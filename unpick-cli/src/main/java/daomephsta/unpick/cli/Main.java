@@ -51,11 +51,13 @@ public class Main {
     private static void unpick(Path inputJar, Path outputJar, Path unpickDefinition, Path constantJar, Collection<Path> classpath) throws IOException {
         Files.deleteIfExists(outputJar);
 
+        Collection<Path> constantClasspath = new LinkedList<>(classpath);
+        constantClasspath.add(constantJar);
         classpath.add(inputJar);
 
         try (
              JarClassResolver minecraftClassResolver = new JarClassResolver(classpath);
-             JarClassResolver constantClassResolver = new JarClassResolver(Collections.singleton(constantJar));
+             JarClassResolver constantClassResolver = new JarClassResolver(constantClasspath);
              InputStream unpickDefinitionStream = Files.newInputStream(unpickDefinition)
         ) {
             ConstantUninliner uninliner = new ConstantUninliner(
