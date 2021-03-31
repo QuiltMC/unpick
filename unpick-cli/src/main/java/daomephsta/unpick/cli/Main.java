@@ -34,35 +34,33 @@ public class Main {
         Path unpickDefinition = Paths.get(args[2]);
         Path constantJar = Paths.get(args[3]);
 
-        Collection<Path> classPath = new LinkedList<>();
+        Collection<Path> classpath = new LinkedList<>();
+
+        classpath.add(constantJar);
+        classpath.add(inputJar);
 
         for (int i = 4; i < args.length; i++) {
-            classPath.add(Paths.get(args[i]));
+            classpath.add(Paths.get(args[i]));
         }
 
         try {
-            unpick(inputJar, outputJar, unpickDefinition, constantJar, classPath);
+            unpick(inputJar, outputJar, unpickDefinition, classpath);
         } catch (IOException e) {
             Files.delete(outputJar);
             throw e;
         }
     }
 
-    private static void unpick(Path inputJar, Path outputJar, Path unpickDefinition, Path constantJar, Collection<Path> classpath) throws IOException {
+    private static void unpick(Path inputJar, Path outputJar, Path unpickDefinition, Collection<Path> classpath) throws IOException {
         Files.deleteIfExists(outputJar);
 
-        Collection<Path> constantClasspath = new LinkedList<>(classpath);
-        constantClasspath.add(constantJar);
-        classpath.add(inputJar);
-
         try (
-             JarClassResolver minecraftClassResolver = new JarClassResolver(classpath);
-             JarClassResolver constantClassResolver = new JarClassResolver(constantClasspath);
+             JarClassResolver classResolver = new JarClassResolver(classpath);
              InputStream unpickDefinitionStream = Files.newInputStream(unpickDefinition)
         ) {
             ConstantUninliner uninliner = new ConstantUninliner(
-                    ConstantMappers.dataDriven(minecraftClassResolver, unpickDefinitionStream),
-                    ConstantResolvers.bytecodeAnalysis(constantClassResolver)
+                    ConstantMappers.dataDriven(classResolver, unpickDefinitionStream),
+                    ConstantResolvers.bytecodeAnalysis(classResolver)
             );
 
             try (JarFile jarFile = new JarFile(inputJar.toFile()); JarOutputStream outputStream = new JarOutputStream(Files.newOutputStream(outputJar))) {
