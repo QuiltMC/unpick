@@ -1,11 +1,67 @@
 package daomephsta.unpick.impl;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 
 public enum IntegerType
 {
+	BYTE(Byte.class, byte.class, Type.BYTE_TYPE, Opcodes.IAND, Opcodes.IRETURN) 
+	{
+		@Override
+		public AbstractInsnNode createLiteralPushInsn(long literal)
+			{ return InstructionFactory.pushesInt((byte) literal); }
+
+		@Override
+		public void appendLiteralPushInsn(MethodVisitor mv, long literal)
+			{ InstructionFactory.pushesInt(mv, (byte) literal); }
+		
+		@Override
+		public Number box(long value)
+			{ return Byte.valueOf((byte) value); }
+
+		@Override
+		public Number binaryNegate(Number value)
+			{ return (byte) ~value.byteValue(); }
+
+		@Override
+		public long toUnsignedLong(Number value)
+			{ return Byte.toUnsignedLong(value.byteValue()); }
+
+		@Override
+		public Number parse(String valueString)
+			{ return Byte.parseByte(valueString); }
+	},
+	SHORT(Short.class, short.class, Type.SHORT_TYPE, Opcodes.IAND, Opcodes.IRETURN) 
+	{
+		@Override
+		public AbstractInsnNode createLiteralPushInsn(long literal)
+			{ return InstructionFactory.pushesInt((short) literal); }
+
+		@Override
+		public void appendLiteralPushInsn(MethodVisitor mv, long literal)
+			{ InstructionFactory.pushesInt(mv, (short) literal); }
+		
+		@Override
+		public Number box(long value)
+			{ return Short.valueOf((short) value); }
+
+		@Override
+		public Number binaryNegate(Number value)
+			{ return (short) ~value.shortValue(); }
+
+		@Override
+		public long toUnsignedLong(Number value)
+			{ return Short.toUnsignedLong(value.shortValue()); }
+
+		@Override
+		public Number parse(String valueString)
+			{ return Short.parseShort(valueString); }
+	},
 	INT(Integer.class, int.class, Type.INT_TYPE, Opcodes.IAND, Opcodes.IRETURN) 
 	{
 		@Override
@@ -18,7 +74,7 @@ public enum IntegerType
 		
 		@Override
 		public Number box(long value)
-			{ return new Integer((int) value); }
+			{ return Integer.valueOf((int) value); }
 
 		@Override
 		public Number binaryNegate(Number value)
@@ -27,6 +83,10 @@ public enum IntegerType
 		@Override
 		public long toUnsignedLong(Number value)
 			{ return Integer.toUnsignedLong(value.intValue()); }
+		
+		@Override
+		public Number parse(String valueString)
+			{ return Integer.parseInt(valueString); }
 	},
 	LONG(Long.class, long.class, Type.LONG_TYPE, Opcodes.LAND, Opcodes.LRETURN) 
 	{
@@ -40,7 +100,7 @@ public enum IntegerType
 		
 		@Override
 		public Number box(long value)
-			{ return new Long(value); }
+			{ return Long.valueOf(value); }
 
 		@Override
 		public Number binaryNegate(Number value)
@@ -49,6 +109,10 @@ public enum IntegerType
 		@Override
 		public long toUnsignedLong(Number value)
 			{ return value.longValue(); }
+		
+		@Override
+		public Number parse(String valueString)
+			{ return Long.parseLong(valueString); }
 	};
 	
 	private final Class<? extends Number> boxed, primitive;
@@ -64,14 +128,31 @@ public enum IntegerType
 		this.returnOpcode = returnOpcode;
 	}
 	
-	public static IntegerType from(Class<?> clazz)
+	public static IntegerType from(Type type)
+	{ 
+		for (IntegerType intType : values())
+		{
+			if (intType.type == type)
+				return intType;
+		}
+		throw new IllegalArgumentException(type + " is not one of: " + describeValidTypes());
+	}
+	
+	public static IntegerType from(Object literal)
+	{ 
+		for (IntegerType type : values())
+		{
+			if (literal.getClass() == type.getBoxClass() || literal.getClass() == type.getPrimitiveClass())
+				return type;
+		}
+		throw new IllegalArgumentException(literal + " is not one of: " + describeValidTypes());
+	}
+
+	private static String describeValidTypes()
 	{
-		if (clazz == Integer.class || clazz == int.class)
-			return INT;
-		else if (clazz == Long.class || clazz == long.class)
-			return LONG;
-		else
-			throw new IllegalArgumentException("Expected an integer or long, got " + clazz);
+		return Arrays.stream(values())
+			.map(t -> t.name().toLowerCase(Locale.ROOT))
+			.collect(Collectors.joining(", "));
 	}
 	
 	public AbstractInsnNode createAndInsn()
@@ -158,4 +239,6 @@ public enum IntegerType
 	public abstract Number binaryNegate(Number value);
 
 	public abstract long toUnsignedLong(Number value);
+	
+	public abstract Number parse(String valueString);
 }
