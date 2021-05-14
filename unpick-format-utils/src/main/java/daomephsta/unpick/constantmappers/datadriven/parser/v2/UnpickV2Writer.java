@@ -20,7 +20,7 @@ public class UnpickV2Writer implements Visitor
 			return;
 		}
 
-		writeBuffer.append("v2\n");
+		writeBuffer.append("v2").append(System.lineSeparator());
 	}
 	
 	@Override
