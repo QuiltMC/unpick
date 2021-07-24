@@ -25,82 +25,7 @@ import daomephsta.unpick.tests.lib.TestUtils;
 
 public class SimpleConstantUninliningTest
 {
-    @SuppressWarnings("unused")
-	private static class Methods
-	{
-		private static void byteConsumer(byte test) {}
-
-		private static void intConsumer(int test) {}
-		
-		private static void shortConsumer(short test) {}
-		
-		private static void charConsumer(char test) {}
-
-		private static void longConsumer(long test) {}
-
-		private static void floatConsumer(float test) {}
-
-		private static void doubleConsumer(double test) {}
-
-		private static void stringConsumer(String test) {}
-	}
-
-	@SuppressWarnings("unused")
-	private static class Constants
-	{
-		public static final byte BYTE_CONST_M1 = -1,
-								 BYTE_CONST_0 = 0,
-								 BYTE_CONST_1 = 1,
-								 BYTE_CONST_2 = 2,
-								 BYTE_CONST_3 = 3,
-								 BYTE_CONST_4 = 4,
-								 BYTE_CONST_5 = 5,
-								 BYTE_CONST = 117;
-
-		public static final short SHORT_CONST_M1 = -1,
-								  SHORT_CONST_0 = 0,
-								  SHORT_CONST_1 = 1,
-								  SHORT_CONST_2 = 2,
-								  SHORT_CONST_3 = 3,
-								  SHORT_CONST_4 = 4,
-								  SHORT_CONST_5 = 5,
-								  SHORT_CONST = 257;
-		
-		public static final char CHAR_CONST_0 = '\0',
-			                     CHAR_CONST_1 = '\1',
-			                     CHAR_CONST_2 = '\2',
-			                     CHAR_CONST_3 = '\3',
-			                     CHAR_CONST_4 = '\4',
-			                     CHAR_CONST_5 = '\5',
-			                     CHAR_CONST = '\257';
-		
-		public static final int INT_CONST_M1 = -1,
-								INT_CONST_0 = 0,
-								INT_CONST_1 = 1,
-								INT_CONST_2 = 2,
-								INT_CONST_3 = 3,
-								INT_CONST_4 = 4,
-								INT_CONST_5 = 5,
-								INT_CONST = 257;
-
-		public static final long LONG_CONST_0 = 0,
-								 LONG_CONST_1 = 1,
-								 LONG_CONST = 1234567890;
-		
-		public static final float FLOAT_CONST_0 = 0F,
-								  FLOAT_CONST_1 = 1F,
-								  FLOAT_CONST_2 = 2F,
-								  FLOAT_CONST = 5.3F;
-		
-		public static final double DOUBLE_CONST_0 = 0D,
-								   DOUBLE_CONST_1 = 1D,
-								   DOUBLE_CONST = 5.3D;
-		
-		public static final String STRING_CONST_FOO = "foo",
-						   		   STRING_CONST_BAR = "bar";
-	}
-	
-	@ParameterizedTest(name = "{0} -> {1}")
+    @ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("knownBytesProvider")
 	public void testKnownByteConstantsParameter(Byte constant, String constantName)
 	{	
@@ -118,13 +43,13 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.BYTE_CONST_M1, "BYTE_CONST_M1"),
-			Arguments.of(Constants.BYTE_CONST_0, "BYTE_CONST_0"),
-			Arguments.of(Constants.BYTE_CONST_1, "BYTE_CONST_1"),
-			Arguments.of(Constants.BYTE_CONST_2, "BYTE_CONST_2"),
-			Arguments.of(Constants.BYTE_CONST_3, "BYTE_CONST_3"),
-			Arguments.of(Constants.BYTE_CONST_4, "BYTE_CONST_4"),
-			Arguments.of(Constants.BYTE_CONST_5, "BYTE_CONST_5")
+			Arguments.of(ConstantSource.BYTE_CONST_M1, "BYTE_CONST_M1"),
+			Arguments.of(ConstantSource.BYTE_CONST_0, "BYTE_CONST_0"),
+			Arguments.of(ConstantSource.BYTE_CONST_1, "BYTE_CONST_1"),
+			Arguments.of(ConstantSource.BYTE_CONST_2, "BYTE_CONST_2"),
+			Arguments.of(ConstantSource.BYTE_CONST_3, "BYTE_CONST_3"),
+			Arguments.of(ConstantSource.BYTE_CONST_4, "BYTE_CONST_4"),
+			Arguments.of(ConstantSource.BYTE_CONST_5, "BYTE_CONST_5")
 		);
 	}
 	
@@ -160,13 +85,13 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.SHORT_CONST_M1, "SHORT_CONST_M1"),
-			Arguments.of(Constants.SHORT_CONST_0, "SHORT_CONST_0"),
-			Arguments.of(Constants.SHORT_CONST_1, "SHORT_CONST_1"),
-			Arguments.of(Constants.SHORT_CONST_2, "SHORT_CONST_2"),
-			Arguments.of(Constants.SHORT_CONST_3, "SHORT_CONST_3"),
-			Arguments.of(Constants.SHORT_CONST_4, "SHORT_CONST_4"),
-			Arguments.of(Constants.SHORT_CONST_5, "SHORT_CONST_5")
+			Arguments.of(ConstantSource.SHORT_CONST_M1, "SHORT_CONST_M1"),
+			Arguments.of(ConstantSource.SHORT_CONST_0, "SHORT_CONST_0"),
+			Arguments.of(ConstantSource.SHORT_CONST_1, "SHORT_CONST_1"),
+			Arguments.of(ConstantSource.SHORT_CONST_2, "SHORT_CONST_2"),
+			Arguments.of(ConstantSource.SHORT_CONST_3, "SHORT_CONST_3"),
+			Arguments.of(ConstantSource.SHORT_CONST_4, "SHORT_CONST_4"),
+			Arguments.of(ConstantSource.SHORT_CONST_5, "SHORT_CONST_5")
 		);
 	}
 	
@@ -202,12 +127,12 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.CHAR_CONST_0, "CHAR_CONST_0"),
-			Arguments.of(Constants.CHAR_CONST_1, "CHAR_CONST_1"),
-			Arguments.of(Constants.CHAR_CONST_2, "CHAR_CONST_2"),
-			Arguments.of(Constants.CHAR_CONST_3, "CHAR_CONST_3"),
-			Arguments.of(Constants.CHAR_CONST_4, "CHAR_CONST_4"),
-			Arguments.of(Constants.CHAR_CONST_5, "CHAR_CONST_5")
+			Arguments.of(ConstantSource.CHAR_CONST_0, "CHAR_CONST_0"),
+			Arguments.of(ConstantSource.CHAR_CONST_1, "CHAR_CONST_1"),
+			Arguments.of(ConstantSource.CHAR_CONST_2, "CHAR_CONST_2"),
+			Arguments.of(ConstantSource.CHAR_CONST_3, "CHAR_CONST_3"),
+			Arguments.of(ConstantSource.CHAR_CONST_4, "CHAR_CONST_4"),
+			Arguments.of(ConstantSource.CHAR_CONST_5, "CHAR_CONST_5")
 		);
 	}
 	
@@ -243,13 +168,13 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.INT_CONST_M1, "INT_CONST_M1"),
-			Arguments.of(Constants.INT_CONST_0, "INT_CONST_0"),
-			Arguments.of(Constants.INT_CONST_1, "INT_CONST_1"),
-			Arguments.of(Constants.INT_CONST_2, "INT_CONST_2"),
-			Arguments.of(Constants.INT_CONST_3, "INT_CONST_3"),
-			Arguments.of(Constants.INT_CONST_4, "INT_CONST_4"),
-			Arguments.of(Constants.INT_CONST_5, "INT_CONST_5")
+			Arguments.of(ConstantSource.INT_CONST_M1, "INT_CONST_M1"),
+			Arguments.of(ConstantSource.INT_CONST_0, "INT_CONST_0"),
+			Arguments.of(ConstantSource.INT_CONST_1, "INT_CONST_1"),
+			Arguments.of(ConstantSource.INT_CONST_2, "INT_CONST_2"),
+			Arguments.of(ConstantSource.INT_CONST_3, "INT_CONST_3"),
+			Arguments.of(ConstantSource.INT_CONST_4, "INT_CONST_4"),
+			Arguments.of(ConstantSource.INT_CONST_5, "INT_CONST_5")
 		);
 	}
 	
@@ -285,9 +210,9 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.LONG_CONST_0, "LONG_CONST_0"), 
-			Arguments.of(Constants.LONG_CONST_1, "LONG_CONST_1"),
-			Arguments.of(Constants.LONG_CONST, "LONG_CONST")
+			Arguments.of(ConstantSource.LONG_CONST_0, "LONG_CONST_0"),
+			Arguments.of(ConstantSource.LONG_CONST_1, "LONG_CONST_1"),
+			Arguments.of(ConstantSource.LONG_CONST, "LONG_CONST")
 		);
 	}
 	
@@ -323,10 +248,10 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.FLOAT_CONST_0, "FLOAT_CONST_0"), 
-			Arguments.of(Constants.FLOAT_CONST_1, "FLOAT_CONST_1"),
-			Arguments.of(Constants.FLOAT_CONST_2, "FLOAT_CONST_2"),
-			Arguments.of(Constants.FLOAT_CONST, "FLOAT_CONST")
+			Arguments.of(ConstantSource.FLOAT_CONST_0, "FLOAT_CONST_0"),
+			Arguments.of(ConstantSource.FLOAT_CONST_1, "FLOAT_CONST_1"),
+			Arguments.of(ConstantSource.FLOAT_CONST_2, "FLOAT_CONST_2"),
+			Arguments.of(ConstantSource.FLOAT_CONST, "FLOAT_CONST")
 		);
 	}
 	
@@ -362,9 +287,9 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.DOUBLE_CONST_0, "DOUBLE_CONST_0"), 
-			Arguments.of(Constants.DOUBLE_CONST_1, "DOUBLE_CONST_1"), 
-			Arguments.of(Constants.DOUBLE_CONST, "DOUBLE_CONST")
+			Arguments.of(ConstantSource.DOUBLE_CONST_0, "DOUBLE_CONST_0"),
+			Arguments.of(ConstantSource.DOUBLE_CONST_1, "DOUBLE_CONST_1"),
+			Arguments.of(ConstantSource.DOUBLE_CONST, "DOUBLE_CONST")
 		);
 	}
 	
@@ -400,8 +325,8 @@ public class SimpleConstantUninliningTest
 	{
 		return Stream.of
 		(
-			Arguments.of(Constants.STRING_CONST_FOO, "STRING_CONST_FOO"),
-			Arguments.of(Constants.STRING_CONST_BAR, "STRING_CONST_BAR")
+			Arguments.of(ConstantSource.STRING_CONST_FOO, "STRING_CONST_FOO"),
+			Arguments.of(ConstantSource.STRING_CONST_BAR, "STRING_CONST_BAR")
 		);
 	}
 	
@@ -428,9 +353,9 @@ public class SimpleConstantUninliningTest
 			IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
 			MockConstantMapper.builder(classResolver, constantResolver)
     		    .simpleConstantGroup("test")
-    	            .define((Class<?>) Constants.class, "DOES_NOT_EXIST")
+    	            .define(ConstantSource.class, "DOES_NOT_EXIST")
     	        .add()
-    	        .targetMethod(Methods.class, "foo", "(I)V")
+    	        .targetMethod(MethodSource.class, "foo", "(I)V")
     	            .remapParameter(0, "test")
     	        .add()
     	        .build();
@@ -444,9 +369,9 @@ public class SimpleConstantUninliningTest
 		IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
 		IConstantMapper mapper = MockConstantMapper.builder(classResolver, constantResolver)
 				.simpleConstantGroup("test")
-					.define(Constants.class, expectedConstant)
+					.define(ConstantSource.class, expectedConstant)
 				.add()
-				.targetMethod(Methods.class, constantConsumerName, constantConsumerDescriptor)
+				.targetMethod(MethodSource.class, constantConsumerName, constantConsumerDescriptor)
 					.remapParameter(0, "test")
 				.add()
 				.build();
@@ -454,12 +379,12 @@ public class SimpleConstantUninliningTest
 		LiteralType literalType = LiteralType.from(constant.getClass());
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
 		MockMethod mockInvocation = classResolver.mock(
-			TestUtils.mockInvokeStatic(Methods.class, constantConsumerName, constantConsumerDescriptor, constant));
+			TestUtils.mockInvokeStatic(MethodSource.class, constantConsumerName, constantConsumerDescriptor, constant));
 		int invocationInsnIndex = 1;
 		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation, 
 				invocationInsnIndex);
 		uninliner.transformMethod(mockInvocation.getOwner(), mockInvocation.getName(), mockInvocation.getDescriptor());
-		ASMAssertions.assertReadsField(mockInvocation.getInstructions().get(invocationInsnIndex - 1), Constants.class, expectedConstant, 
+		ASMAssertions.assertReadsField(mockInvocation.getInstructions().get(invocationInsnIndex - 1), ConstantSource.class, expectedConstant, 
 				literalType.getTypeDescriptor());
 	}
 
@@ -476,7 +401,7 @@ public class SimpleConstantUninliningTest
 		MockMethod mockMethod = classResolver.mock(mock);
 		IConstantMapper mapper = MockConstantMapper.builder(classResolver, constantResolver)
 				.simpleConstantGroup("test")
-					.define(Constants.class, expectedConstant)
+					.define(ConstantSource.class, expectedConstant)
 				.add()
 				.targetMethod(mock.getMockClass().name, mockMethod.getName(), mockMethod.getDescriptor())
 					.remapReturn("test")
@@ -489,7 +414,7 @@ public class SimpleConstantUninliningTest
 		ASMAssertions.assertIsLiteral(mockMethod.getInstructions().get(returnInsnIndex - 1), constant);
 		ASMAssertions.assertOpcode(mockMethod.getInstructions().get(returnInsnIndex), literalType.getReturnOpcode());
 		uninliner.transformMethod(mockMethod.getOwner(), mockMethod.getName(), mockMethod.getDescriptor());
-		ASMAssertions.assertReadsField(mockMethod.getInstructions().get(returnInsnIndex - 1), Constants.class, expectedConstant, 
+		ASMAssertions.assertReadsField(mockMethod.getInstructions().get(returnInsnIndex - 1), ConstantSource.class, expectedConstant, 
 				literalType.getTypeDescriptor());
 	}
 	
@@ -500,14 +425,14 @@ public class SimpleConstantUninliningTest
 		IConstantMapper mapper = MockConstantMapper.builder(classResolver, constantResolver)
 				.simpleConstantGroup("test")
 				.add()
-				.targetMethod(Methods.class, constantConsumerName, constantConsumerDescriptor)
+				.targetMethod(MethodSource.class, constantConsumerName, constantConsumerDescriptor)
 					.remapParameter(0, "test")
 				.add()
 				.build();
 
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
 		MockMethod mockInvocation = classResolver.mock(
-			TestUtils.mockInvokeStatic(Methods.class, constantConsumerName, constantConsumerDescriptor, constant));
+			TestUtils.mockInvokeStatic(MethodSource.class, constantConsumerName, constantConsumerDescriptor, constant));
 		int invocationInsnIndex = 1;
 		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation, 
 				invocationInsnIndex);
@@ -550,10 +475,10 @@ public class SimpleConstantUninliningTest
 			MockMethod mockInvocation, int invocationInsnIndex)
 	{
 		int expectedInstructionCount = 3;
-		assertEquals(expectedInstructionCount, mockInvocation.getInstructions().size(), 
-				String.format("Expected %d instructions, found %d", expectedInstructionCount, mockInvocation.getInstructions().size()));
+		assertEquals(expectedInstructionCount, mockInvocation.getInstructions().size(), String.format(
+			"Expected %d instructions, found %d", expectedInstructionCount, mockInvocation.getInstructions().size()));
 		ASMAssertions.assertIsLiteral(mockInvocation.getInstructions().get(invocationInsnIndex - 1), expectedLiteralValue);
-		ASMAssertions.assertInvokesMethod(mockInvocation.getInstructions().get(invocationInsnIndex), Methods.class, 
+		ASMAssertions.assertInvokesMethod(mockInvocation.getInstructions().get(invocationInsnIndex), MethodSource.class,
 				constantConsumerName, constantConsumerDescriptor);
 		ASMAssertions.assertOpcode(mockInvocation.getInstructions().get(invocationInsnIndex + 1), RETURN);
 	}
