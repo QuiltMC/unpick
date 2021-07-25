@@ -12,7 +12,7 @@ public class ConstantResolvers
 	/**
 	 * @param classResolver a class resolver for resolving the constants' owner classes.
 	 * @return a constant resolver that resolves constants by inspecting the bytecode of their
-	 * owning classes. 
+	 * owning classes.
 	 */
 	public static IConstantResolver bytecodeAnalysis(IClassResolver classResolver)
 	{

@@ -28,15 +28,15 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 	{
 		super(constantGroups);
 		this.targetInvocations = targetInvocations;
-        boolean resolved = true;
-        for (AbstractConstantGroup<?> group : constantGroups.values())
-        {
-            group.resolveAllConstants(constantResolver);
-            if (!group.isResolved())
-                resolved = false;
-        }
-        if (!resolved)
-            throw new RuntimeException("One or more constants failed to resolve, check the log for details");
+		boolean resolved = true;
+		for (AbstractConstantGroup<?> group : constantGroups.values())
+		{
+			group.resolveAllConstants(constantResolver);
+			if (!group.isResolved())
+				resolved = false;
+		}
+		if (!resolved)
+			throw new RuntimeException("One or more constants failed to resolve, check the log for details");
 	}
 
 	public static Builder builder(IClassResolver classResolver, IConstantResolver constantResolver)
@@ -49,13 +49,13 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 	{
 		return targetInvocations;
 	}
-	
+
 	public static class Builder
 	{
 		private final Map<String, AbstractConstantGroup<?>> constantGroups = new HashMap<>();
 		private final TargetMethods.Builder targetMethodsBuilder;
-        private final IConstantResolver constantResolver;
-		
+		private final IConstantResolver constantResolver;
+
 		public Builder(IClassResolver classResolver, IConstantResolver constantResolver)
 		{
 			this.targetMethodsBuilder = TargetMethods.builder(classResolver);
@@ -71,23 +71,23 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 		{
 			return new TargetMethodBuilder(this, owner, name, descriptor);
 		}
-		
+
 		public ConstantGroupBuilder<SimpleConstantDefinition> simpleConstantGroup(String name)
 		{
 			return new ConstantGroupBuilder<>(this, name, SimpleConstantDefinition::new, SimpleConstantGroup::new);
 		}
-		
+
 		public ConstantGroupBuilder<FlagDefinition> flagConstantGroup(String name)
 		{
 			return new ConstantGroupBuilder<>(this, name, FlagDefinition::new, FlagConstantGroup::new);
 		}
-		
+
 		public MockConstantMapper build()
 		{
 			return new MockConstantMapper(constantGroups, constantResolver, targetMethodsBuilder.build());
 		}
 	}
-	
+
 	public static abstract class ChildBuilder
 	{
 		protected final Builder parent;
@@ -97,9 +97,9 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 			this.parent = parent;
 		}
 	}
-	
+
 	public static class TargetMethodBuilder extends ChildBuilder
-	{	
+	{
 		private final TargetMethods.TargetMethodBuilder targetMethodBuilder;
 
 		TargetMethodBuilder(Builder parent, String owner, String name, String descriptor)
@@ -107,33 +107,33 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 			super(parent);
 			this.targetMethodBuilder = parent.targetMethodsBuilder.targetMethod(owner, name, Type.getType(descriptor));
 		}
-		
+
 		public TargetMethodBuilder remapParameter(int parameterIndex, String constantGroup)
 		{
 			targetMethodBuilder.parameterGroup(parameterIndex, constantGroup);
 			return this;
 		}
-		
+
 		public TargetMethodBuilder remapReturn(String constantGroup)
 		{
 			targetMethodBuilder.returnGroup(constantGroup);
 			return this;
 		}
-		
+
 		public Builder add()
 		{
 			targetMethodBuilder.add();
 			return parent;
 		}
 	}
-	
+
 	public static class ConstantGroupBuilder<T extends AbstractConstantDefinition<T>> extends ChildBuilder
 	{
 		private final String name;
 		private final Collection<T> constantDefinitions = new ArrayList<>();
 		private final BiFunction<String, String, T> definitionFactory;
 		private final Function<String, AbstractConstantGroup<T>> groupFactory;
-		
+
 		ConstantGroupBuilder(Builder parent, String name,
 				BiFunction<String, String, T> definitionFactory,
 				Function<String, AbstractConstantGroup<T>> groupFactory)
@@ -148,13 +148,13 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 		{
 			return define(owner.getName(), name);
 		}
-		
+
 		public ConstantGroupBuilder<T> define(String owner, String name)
 		{
 			constantDefinitions.add(definitionFactory.apply(owner.replace('.', '/'), name));
 			return this;
 		}
-		
+
 		public ConstantGroupBuilder<T> defineAll(Class<?> owner, String... names)
 		{
 			for (String name : names)
@@ -163,7 +163,7 @@ public class MockConstantMapper extends SimpleAbstractConstantMapper
 			}
 			return this;
 		}
-		
+
 		public Builder add()
 		{
 			AbstractConstantGroup<T> group = groupFactory.apply(name);

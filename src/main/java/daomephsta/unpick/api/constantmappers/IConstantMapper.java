@@ -15,19 +15,19 @@ public interface IConstantMapper
 	 * @return true if this mapper targets the method.
 	 */
 	public boolean targets(String methodOwner, String methodName, String methodDescriptor);
-	
+
 	/**
 	 * @param methodOwner the internal name of the class that owns the method.
 	 * @param methodName the name of the method.
 	 * @param methodDescriptor the descriptor of the method.
 	 * @param parameterIndex the index of the parameter being checked
-	 * @return true if this mapper targets the parameter of the method with a 
+	 * @return true if this mapper targets the parameter of the method with a
 	 * parameter index of {@code parameterIndex}.
 	 */
 	public boolean targetsParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex);
-	
+
 	/**
-	 * Maps an inlined parameter value to replacement instructions, for a given target method. 
+	 * Maps an inlined parameter value to replacement instructions, for a given target method.
 	 * @param methodOwner the internal name of the class that owns the target method.
 	 * @param methodName the name of the target method.
 	 * @param methodDescriptor the descriptor of the target method.
@@ -45,7 +45,7 @@ public interface IConstantMapper
 	public boolean targetsReturn(String methodOwner, String methodName, String methodDescriptor);
 
 	/**
-	 * Maps an inlined return value to replacement instructions, for a given target method. 
+	 * Maps an inlined return value to replacement instructions, for a given target method.
 	 * @param methodOwner the internal name of the class that owns the target method.
 	 * @param methodName the name of the target method.
 	 * @param methodDescriptor the descriptor of the target method.

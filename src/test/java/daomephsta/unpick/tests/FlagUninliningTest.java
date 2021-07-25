@@ -34,49 +34,49 @@ public class FlagUninliningTest
 	{
 		testKnownFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("byteFlagsProvider")
 	public void testKnownByteFlagsParameter(Byte testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsParameter(testConstant, expectedConstantCombination, constantNames, "byteConsumer", "(B)V");
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("shortFlagsProvider")
 	public void testKnownShortFlagsReturn(Short testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("shortFlagsProvider")
 	public void testKnownShortFlagsParameter(Short testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsParameter(testConstant, expectedConstantCombination, constantNames, "shortConsumer", "(S)V");
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("intFlagsProvider")
 	public void testKnownIntFlagsReturn(Integer testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {1}")
 	@MethodSource("intFlagsProvider")
 	public void testKnownIntFlagsParameter(Integer testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsParameter(testConstant, expectedConstantCombination, constantNames, "intConsumer", "(I)V");
 	}
-	
+
 	@ParameterizedTest(name = "{0}L -> {1}")
 	@MethodSource("longFlagsProvider")
 	public void testKnownLongFlagsParameter(Long testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testKnownFlagsParameter(testConstant, expectedConstantCombination, constantNames, "longConsumer", "(J)V");
 	}
-	
+
 	@ParameterizedTest(name = "{0}L -> {1}")
 	@MethodSource("longFlagsProvider")
 	public void testKnownLongFlagsReturn(Long testConstant, String[] expectedConstantCombination, String[] constantNames)
@@ -96,26 +96,26 @@ public class FlagUninliningTest
 					.remapParameter(0, "test")
 				.add()
 				.build();
-		
+
 		IntegerType integerType = IntegerType.from(testConstant);
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
-		
+
 		MockMethod mockMethod = classResolver.mock(
 			TestUtils.mockInvokeStatic(MethodSource.class, constantConsumerName, constantConsumerDescriptor, testConstant));
 		int invocationInsnIndex = 1;
 		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, testConstant, mockMethod, invocationInsnIndex);
 		uninliner.transformMethod(mockMethod.getOwner(), mockMethod.getName(), mockMethod.getDescriptor());
 		int minimumInsnCount = 2 * (expectedConstantCombination.length - 1) + 1;
-		assertTrue(mockMethod.getInstructions().size() >=  minimumInsnCount, 
+		assertTrue(mockMethod.getInstructions().size() >=  minimumInsnCount,
 				String.format("Expected at least %d instructions, found %d", minimumInsnCount, mockMethod.getInstructions().size()));
 		invocationInsnIndex += minimumInsnCount - 1;
-		ASMAssertions.assertInvokesMethod(mockMethod.getInstructions().get(invocationInsnIndex), MethodSource.class, 
+		ASMAssertions.assertInvokesMethod(mockMethod.getInstructions().get(invocationInsnIndex), MethodSource.class,
 				constantConsumerName, constantConsumerDescriptor);
-		ASMAssertions.assertReadsField(mockMethod.getInstructions().get(0), ConstantSource.class, 
+		ASMAssertions.assertReadsField(mockMethod.getInstructions().get(0), ConstantSource.class,
 				expectedConstantCombination[0], integerType.getTypeDescriptor());
 		for (int j = 1; j < expectedConstantCombination.length; j += 2)
 		{
-			ASMAssertions.assertReadsField(mockMethod.getInstructions().get(j), ConstantSource.class, 
+			ASMAssertions.assertReadsField(mockMethod.getInstructions().get(j), ConstantSource.class,
 					expectedConstantCombination[j], integerType.getTypeDescriptor());
 			ASMAssertions.assertOpcode(mockMethod.getInstructions().get(j + 1), integerType.getOrOpcode());
 		}
@@ -126,7 +126,7 @@ public class FlagUninliningTest
 		MethodMockingClassResolver classResolver = new MethodMockingClassResolver();
 		IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
 		IntegerType integerType = IntegerType.from(testConstant);
-		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv -> 
+		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv ->
 		{
 			integerType.appendLiteralPushInsn(mv, testConstant.longValue());
 			integerType.appendReturnInsn(mv);
@@ -141,17 +141,17 @@ public class FlagUninliningTest
 				.build();
 
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
-		
+
 		uninliner.transformMethod(mock.getOwner(), mock.getName(), mock.getDescriptor());
 		int minimumInsnCount = 2 * (expectedConstantCombination.length - 1) + 1;
-		assertTrue(mock.getInstructions().size() >=  minimumInsnCount, 
+		assertTrue(mock.getInstructions().size() >=  minimumInsnCount,
 				String.format("Expected at least %d instructions, found %d", minimumInsnCount, mock.getInstructions().size()));
 		ASMAssertions.assertOpcode(mock.getInstructions().get(mock.getInstructions().size() - 1), integerType.getReturnOpcode());
-		ASMAssertions.assertReadsField(mock.getInstructions().get(0), ConstantSource.class, 
+		ASMAssertions.assertReadsField(mock.getInstructions().get(0), ConstantSource.class,
 				expectedConstantCombination[0], integerType.getTypeDescriptor());
 		for (int j = 1; j < expectedConstantCombination.length; j += 2)
 		{
-			ASMAssertions.assertReadsField(mock.getInstructions().get(j), ConstantSource.class, 
+			ASMAssertions.assertReadsField(mock.getInstructions().get(j), ConstantSource.class,
 					expectedConstantCombination[j], integerType.getTypeDescriptor());
 			ASMAssertions.assertOpcode(mock.getInstructions().get(j + 1), integerType.getOrOpcode());
 		}
@@ -163,7 +163,7 @@ public class FlagUninliningTest
 	{
 		testNegatedFlagsParameter(testConstant, expectedConstantCombination, constantNames, "byteConsumer", "(B)V");
 	}
-	
+
 	@ParameterizedTest(name = "~{0} -> {1}")
 	@MethodSource("byteFlagsProvider")
 	public void testNegatedByteFlagsReturn(Byte testConstant, String[] expectedConstantCombination, String[] constantNames)
@@ -177,42 +177,42 @@ public class FlagUninliningTest
 	{
 		testNegatedFlagsParameter(testConstant, expectedConstantCombination, constantNames, "shortConsumer", "(B)V");
 	}
-	
+
 	@ParameterizedTest(name = "~{0} -> {1}")
 	@MethodSource("shortFlagsProvider")
 	public void testNegatedShortFlagsReturn(Short testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testNegatedFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	@ParameterizedTest(name = "~{0} -> {1}")
 	@MethodSource("intFlagsProvider")
 	public void testNegatedIntFlagsParameter(Integer testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testNegatedFlagsParameter(testConstant, expectedConstantCombination, constantNames, "intConsumer", "(I)V");
 	}
-	
+
 	@ParameterizedTest(name = "~{0} -> {1}")
 	@MethodSource("intFlagsProvider")
 	public void testNegatedIntFlagsReturn(Integer testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testNegatedFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	@ParameterizedTest(name = "~{0}L -> {1}")
 	@MethodSource("longFlagsProvider")
 	public void testNegatedLongFlagsParameter(Long testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testNegatedFlagsParameter(testConstant, expectedConstantCombination, constantNames, "longConsumer", "(J)V");
 	}
-	
+
 	@ParameterizedTest(name = "~{0}L -> {1}")
 	@MethodSource("longFlagsProvider")
 	public void testNegatedLongFlagsReturn(Long testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		testNegatedFlagsReturn(testConstant, expectedConstantCombination, constantNames);
 	}
-	
+
 	private void testNegatedFlagsParameter(Number testConstant, String[] expectedConstantCombination, String[] constantNames, String consumerName, String consumerDescriptor)
 	{
 		MethodMockingClassResolver classResolver = new MethodMockingClassResolver();
@@ -229,7 +229,7 @@ public class FlagUninliningTest
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
 		IntegerType integerType = IntegerType.from(testConstant);
 
-		MockMethod mockMethod = classResolver.mock(MethodMocker.mock(void.class, mv -> 
+		MockMethod mockMethod = classResolver.mock(MethodMocker.mock(void.class, mv ->
 		{
 			mv.visitFieldInsn(Opcodes.GETSTATIC, "Foo", "bar", integerType.getTypeDescriptor());
 			integerType.appendLiteralPushInsn(mv, ~testConstant.longValue());
@@ -241,22 +241,22 @@ public class FlagUninliningTest
 		ListIterator<AbstractInsnNode> instructions = mockMethod.getInstructions().iterator(0);
 		ASMAssertions.assertReadsField(instructions.next(), "Foo", "bar", integerType.getTypeDescriptor());
 
-		ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class, 
+		ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class,
 				expectedConstantCombination[0], integerType.getTypeDescriptor());
 		for (int j = 1; j < expectedConstantCombination.length; j += 2)
 		{
-			ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class, 
+			ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class,
 					expectedConstantCombination[j], integerType.getTypeDescriptor());
 			ASMAssertions.assertOpcode(instructions.next(), integerType.getOrOpcode());
 		}
 	}
-	
+
 	private void testNegatedFlagsReturn(Number testConstant, String[] expectedConstantCombination, String[] constantNames)
 	{
 		MethodMockingClassResolver classResolver = new MethodMockingClassResolver();
 		IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
 		IntegerType integerType = IntegerType.from(testConstant);
-		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv -> 
+		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv ->
 		{
 			mv.visitFieldInsn(Opcodes.GETSTATIC, "Foo", "bar", integerType.getTypeDescriptor());
 			integerType.appendLiteralPushInsn(mv, ~testConstant.longValue());
@@ -273,21 +273,21 @@ public class FlagUninliningTest
 				.build();
 
 		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, constantResolver);
-		
+
 		uninliner.transformMethod(mock.getOwner(), mock.getName(), mock.getDescriptor());
 		ListIterator<AbstractInsnNode> instructions = mock.getInstructions().iterator(0);
 		ASMAssertions.assertReadsField(instructions.next(), "Foo", "bar", integerType.getTypeDescriptor());
 
-		ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class, 
+		ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class,
 				expectedConstantCombination[0], integerType.getTypeDescriptor());
 		for (int j = 1; j < expectedConstantCombination.length; j += 2)
 		{
-			ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class, 
+			ASMAssertions.assertReadsField(instructions.next(), ConstantSource.class,
 					expectedConstantCombination[j], integerType.getTypeDescriptor());
 			ASMAssertions.assertOpcode(instructions.next(), integerType.getOrOpcode());
 		}
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {0}")
 	@ValueSource(bytes = {0b0000, 0b100000, 0b01000, 0b11000})
 	public void testUnknownByteFlagsParameter(Byte testConstant)
@@ -312,22 +312,22 @@ public class FlagUninliningTest
 	public void testUnknownShortFlagsReturn(Short testConstant)
 	{
 		testUnknownFlagsReturn(testConstant);
-	}	
-	
+	}
+
 	@ParameterizedTest(name = "{0} -> {0}")
 	@ValueSource(ints = {0b0000, 0b100000, 0b01000, 0b11000})
 	public void testUnknownIntFlagsParameter(Integer testConstant)
 	{
 		testUnknownFlagsParameter(testConstant, "intConsumer", "(I)V");
 	}
-	
+
 	@ParameterizedTest(name = "{0} -> {0}")
 	@ValueSource(ints = {0b0000, 0b100000, 0b01000, 0b11000})
 	public void testUnknownIntFlagsReturn(Integer testConstant)
 	{
 		testUnknownFlagsReturn(testConstant);
 	}
-	
+
 	@ParameterizedTest(name = "{0}L -> {0}L")
 	@ValueSource(longs = {0b0000L, 0b100000L, 0b01000L, 0b11000L})
 	public void testUnknownLongFlagsParameter(Long testConstant)
@@ -340,7 +340,7 @@ public class FlagUninliningTest
 	{
 		testUnknownFlagsReturn(testConstant);
 	}
-	
+
 	private void testUnknownFlagsParameter(Number constant, String constantConsumerName, String constantConsumerDescriptor)
 	{
 		MethodMockingClassResolver classResolver = new MethodMockingClassResolver();
@@ -358,20 +358,20 @@ public class FlagUninliningTest
 		MockMethod mockInvocation = classResolver.mock(
 			TestUtils.mockInvokeStatic(MethodSource.class, constantConsumerName, constantConsumerDescriptor, constant));
 		int invocationInsnIndex = 1;
-		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation, 
+		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation,
 				invocationInsnIndex);
 		uninliner.transformMethod(mockInvocation.getOwner(), mockInvocation.getName(), mockInvocation.getDescriptor());
 		//Should be unchanged, so this should still pass
-		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation, 
+		checkMockInvocationStructure(constantConsumerName, constantConsumerDescriptor, constant, mockInvocation,
 				invocationInsnIndex);
 	}
-	
+
 	private void testUnknownFlagsReturn(Number testConstant)
 	{
 		MethodMockingClassResolver classResolver = new MethodMockingClassResolver();
 		IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
 		IntegerType integerType = IntegerType.from(testConstant);
-		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv -> 
+		MockMethod mock = classResolver.mock(MethodMocker.mock(integerType.getPrimitiveClass(), mv ->
 		{
 			integerType.appendLiteralPushInsn(mv, testConstant.longValue());
 			integerType.appendReturnInsn(mv);
@@ -384,7 +384,7 @@ public class FlagUninliningTest
 				.add()
 				.build();
 
-		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, 
+		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper,
 			constantResolver);
 
 		ASMAssertions.assertIsLiteral(mock.getInstructions().get(0), testConstant);
@@ -394,7 +394,7 @@ public class FlagUninliningTest
 		ASMAssertions.assertIsLiteral(mock.getInstructions().get(0), testConstant);
 		ASMAssertions.assertOpcode(mock.getInstructions().get(1), integerType.getReturnOpcode());
 	}
-	
+
 	private static Stream<Arguments> byteFlagsProvider()
 	{
 		String[] constantNames = {"BYTE_FLAG_BIT_0", "BYTE_FLAG_BIT_1", "BYTE_FLAG_BIT_2", "BYTE_FLAG_BIT_3"};
@@ -404,9 +404,9 @@ public class FlagUninliningTest
 			Arguments.of((byte) 0b1100, new String[] {"BYTE_FLAG_BIT_2", "BYTE_FLAG_BIT_3"}, constantNames),
 			Arguments.of((byte) 0b1010, new String[] {"BYTE_FLAG_BIT_1", "BYTE_FLAG_BIT_3"}, constantNames),
 			Arguments.of((byte) 0b0111, new String[] {"BYTE_FLAG_BIT_0", "BYTE_FLAG_BIT_1", "BYTE_FLAG_BIT_2"}, constantNames)
-		);	
+		);
 	}
-	
+
 	private static Stream<Arguments> shortFlagsProvider()
 	{
 		String[] constantNames = {"SHORT_FLAG_BIT_0", "SHORT_FLAG_BIT_1", "SHORT_FLAG_BIT_2", "SHORT_FLAG_BIT_3"};
@@ -416,9 +416,9 @@ public class FlagUninliningTest
 			Arguments.of((short) 0b1100, new String[] {"SHORT_FLAG_BIT_2", "SHORT_FLAG_BIT_3"}, constantNames),
 			Arguments.of((short) 0b1010, new String[] {"SHORT_FLAG_BIT_1", "SHORT_FLAG_BIT_3"}, constantNames),
 			Arguments.of((short) 0b0111, new String[] {"SHORT_FLAG_BIT_0", "SHORT_FLAG_BIT_1", "SHORT_FLAG_BIT_2"}, constantNames)
-		);	
+		);
 	}
-	
+
 	private static Stream<Arguments> intFlagsProvider()
 	{
 		String[] constantNames = {"INT_FLAG_BIT_0", "INT_FLAG_BIT_1", "INT_FLAG_BIT_2", "INT_FLAG_BIT_3"};
@@ -428,9 +428,9 @@ public class FlagUninliningTest
 			Arguments.of(0b1100, new String[] {"INT_FLAG_BIT_2", "INT_FLAG_BIT_3"}, constantNames),
 			Arguments.of(0b1010, new String[] {"INT_FLAG_BIT_1", "INT_FLAG_BIT_3"}, constantNames),
 			Arguments.of(0b0111, new String[] {"INT_FLAG_BIT_0", "INT_FLAG_BIT_1", "INT_FLAG_BIT_2"}, constantNames)
-		);	
+		);
 	}
-	
+
 	private static Stream<Arguments> longFlagsProvider()
 	{
 		String[] constantNames = {"LONG_FLAG_BIT_0", "LONG_FLAG_BIT_1", "LONG_FLAG_BIT_2", "LONG_FLAG_BIT_3"};
@@ -440,7 +440,7 @@ public class FlagUninliningTest
 			Arguments.of(0b1100L, new String[] {"LONG_FLAG_BIT_2", "LONG_FLAG_BIT_3"}, constantNames),
 			Arguments.of(0b1010L, new String[] {"LONG_FLAG_BIT_1", "LONG_FLAG_BIT_3"}, constantNames),
 			Arguments.of(0b0111L, new String[] {"LONG_FLAG_BIT_0", "LONG_FLAG_BIT_1", "LONG_FLAG_BIT_2"}, constantNames)
-		);	
+		);
 	}
 
 	private void checkMockInvocationStructure(String constantConsumerName,
@@ -448,10 +448,10 @@ public class FlagUninliningTest
 			MockMethod mockInvocation, int invocationInsnIndex)
 	{
 		int expectedInstructionCount = 3;
-		assertEquals(expectedInstructionCount, mockInvocation.getInstructions().size(), 
+		assertEquals(expectedInstructionCount, mockInvocation.getInstructions().size(),
 				String.format("Expected %d instructions, found %d", expectedInstructionCount, mockInvocation.getInstructions().size()));
 		ASMAssertions.assertIsLiteral(mockInvocation.getInstructions().get(invocationInsnIndex - 1), expectedLiteralValue);
-		ASMAssertions.assertInvokesMethod(mockInvocation.getInstructions().get(invocationInsnIndex), MethodSource.class, 
+		ASMAssertions.assertInvokesMethod(mockInvocation.getInstructions().get(invocationInsnIndex), MethodSource.class,
 				constantConsumerName, constantConsumerDescriptor);
 		ASMAssertions.assertOpcode(mockInvocation.getInstructions().get(invocationInsnIndex + 1), RETURN);
 	}

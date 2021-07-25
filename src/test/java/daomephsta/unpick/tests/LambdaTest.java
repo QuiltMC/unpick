@@ -26,7 +26,7 @@ import daomephsta.unpick.tests.lib.MockConstantMapper;
 
 public class LambdaTest
 {
-	private static final int MINUS_1 = -1, 
+	private static final int MINUS_1 = -1,
 							 ARBITRARY = 257;
 
 	private static Stream<Arguments> lambdaConstantReturn()
@@ -39,10 +39,10 @@ public class LambdaTest
 			arguments("passedInstanceMethodRefParent", ARBITRARY, "ARBITRARY")
 		);
 	}
-	
+
 	@ParameterizedTest(name = "{0}: {1} -> {2}")
 	@MethodSource
-	public void lambdaConstantReturn(String lambdaParentName, int constant, String constantName) throws IOException 
+	public void lambdaConstantReturn(String lambdaParentName, int constant, String constantName) throws IOException
 	{
 		IClassResolver classResolver = new MethodMockingClassResolver();
 		IConstantResolver constantResolver = new BytecodeAnalysisConstantResolver(classResolver);
@@ -57,7 +57,7 @@ public class LambdaTest
 				.remapReturn("test")
 				.add()
 			.build();
-		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper, 
+		ConstantUninliner uninliner = new ConstantUninliner(classResolver, mapper,
 			new BytecodeAnalysisConstantResolver(classResolver));
 		ClassNode lambdaParentClass = classResolver.resolveClassNode(Methods.class.getName());
 		MethodNode lambda = findLambda(classResolver, lambdaParentClass, lambdaParentName);
@@ -76,7 +76,7 @@ public class LambdaTest
 				lambdaParent = method;
 		}
 		assertNotNull(lambdaParent, "Lambda parent " + lambdaParentName + " not found");
-		
+
 		Handle implementation = null;
 		for (AbstractInsnNode insn : lambdaParent.instructions)
 		{
@@ -88,7 +88,7 @@ public class LambdaTest
 			}
 		}
 		assertNotNull(implementation, "INVOKEDYNAMIC not found in " + lambdaParent.name);
-		
+
 		ClassNode lambdaImplClass = classResolver.resolveClassNode(implementation.getOwner());
 		for (MethodNode method : lambdaImplClass.methods)
 		{
@@ -100,45 +100,45 @@ public class LambdaTest
 
 	@SuppressWarnings("unused")
 	private static class Methods
-	{ 
+	{
 		void lambdaParentMINUS_1()
 		{
 			lambdaConsumer(() -> MINUS_1);
 		}
-		
+
 		void lambdaParentARBITRARY()
 		{
 			lambdaConsumer(() -> ARBITRARY);
 		}
-		
+
 		void staticMethodRefParent()
 		{
 			lambdaConsumer(ExternalMethodReferences::staticRef);
 		}
-		
+
 		void boundInstanceMethodRefParent()
 		{
 			ExternalMethodReferences methodRefs = new ExternalMethodReferences();
 			lambdaConsumer(methodRefs::instanceRef);
 		}
-		
+
 		void passedInstanceMethodRefParent()
 		{
 			lambdaConsumer(ExternalMethodReferences::instanceRef, new ExternalMethodReferences());
 		}
 
 		void lambdaConsumer(LambdaI lambda) {}
-		
+
 		<T> void lambdaConsumer(LambdaT2I<T> lambda, T instance) {}
 	}
-	
+
 	private static class ExternalMethodReferences
-	{ 
+	{
 		static int staticRef()
 		{
 			return ARBITRARY;
-		} 
-		
+		}
+
 		int instanceRef()
 		{
 			return ARBITRARY;
@@ -149,7 +149,7 @@ public class LambdaTest
 	{
 		public int getInt();
 	}
-	
+
 	interface LambdaT2I<T>
 	{
 		public int getInt(T t);

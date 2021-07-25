@@ -19,11 +19,11 @@ public abstract class AbstractConstantDefinition<C extends AbstractConstantDefin
 						 name;
 	protected Type descriptor;
 	protected Object value;
-	
+
 	/**
 	 * Constructs an instance of AbstractConstantDefinition that will
 	 * have its value and descriptor lazily resolved.
-	 * @param owner the internal name of the class that owns 
+	 * @param owner the internal name of the class that owns
 	 * the represented constant.
 	 * @param name the name of the represented constant.
 	 */
@@ -34,9 +34,9 @@ public abstract class AbstractConstantDefinition<C extends AbstractConstantDefin
 	}
 
 	/**
-	 * Constructs an instance of AbstractConstantDefinition with the 
+	 * Constructs an instance of AbstractConstantDefinition with the
 	 * specified value and descriptor.
-	 * @param owner the internal name of the class that owns 
+	 * @param owner the internal name of the class that owns
 	 * the represented constant.
 	 * @param name the name of the represented constant.
 	 * @param descriptor the descriptor of the represented constant.
@@ -49,25 +49,25 @@ public abstract class AbstractConstantDefinition<C extends AbstractConstantDefin
 		this.descriptor = descriptor;
 		this.value = parseValue(valueString);
 	}
-	
-	
+
+
 	protected Object parseValue(String valueString)
 	{
-		try 
-		{ 
+		try
+		{
 			return LiteralType.from(descriptor).parse(valueString);
 		}
-		catch (IllegalArgumentException e) 
+		catch (IllegalArgumentException e)
 		{
-			throw new UnpickSyntaxException("Cannot parse value " + valueString + " with descriptor " + descriptor, e); 
+			throw new UnpickSyntaxException("Cannot parse value " + valueString + " with descriptor " + descriptor, e);
 		}
 	}
-	
+
 	boolean isResolved()
 	{
 		return value != null;
 	}
-	
+
 	public final C resolve(IConstantResolver constantResolver) throws ResolutionException
 	{
 		Entry<Type, Object> resolvedData = constantResolver.resolveConstant(owner, name);
@@ -79,31 +79,31 @@ public abstract class AbstractConstantDefinition<C extends AbstractConstantDefin
 		C self = (C) this;
 		return self;
 	}
-	
+
 	//Subclasses can override this to validate the value
 	protected void setValue(Object value) throws ResolutionException
 	{
 		this.value = value;
 	}
-	
+
 	/**@return the internal name of the class that owns the represented constant*/
 	public String getOwner()
 	{
 		return owner;
 	}
-	
+
 	/**@return the name of the represented constant*/
 	public String getName()
 	{
 		return name;
 	}
-	
+
 	/**@return the descriptor of the represented constant*/
 	public Type getDescriptor()
 	{
 		return descriptor;
 	}
-	
+
 	/**@return the descriptor of the represented constant, as a string*/
 	public String getDescriptorString()
 	{
@@ -115,7 +115,7 @@ public abstract class AbstractConstantDefinition<C extends AbstractConstantDefin
 	{
 		return value;
 	}
-	
+
 	public static class ResolutionException extends Exception
 	{
 		private static final long serialVersionUID = -7161839164703778814L;

@@ -1,7 +1,7 @@
 package daomephsta.unpick.constantmappers.datadriven.parser;
 
 /**
- * Thrown when a syntax error is found in a .unpick file   
+ * Thrown when a syntax error is found in a .unpick file
  * @author Daomephsta
  */
 public class UnpickSyntaxException extends RuntimeException
@@ -17,7 +17,7 @@ public class UnpickSyntaxException extends RuntimeException
 	{
 		super(message, cause);
 	}
-	
+
 	public UnpickSyntaxException(int lineNumber, String message)
 	{
 		super("Line " + lineNumber + ": " + message);

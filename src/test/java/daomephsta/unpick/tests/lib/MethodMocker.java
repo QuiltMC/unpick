@@ -20,12 +20,12 @@ public class MethodMocker
 								  NO_INTERFACES = null;
 	private static final String NO_SIGNATURE = null,
 								OBJECT_SUPERCLASS = "java/lang/Object";
-	
-	public static class MockMethod 
+
+	public static class MockMethod
 	{
 		private final MethodNode mockMethod;
 		private final ClassNode mockClass;
-		
+
 		public MockMethod(MethodNode mockMethod, ClassNode mockClass)
 		{
 			this.mockMethod = mockMethod;
@@ -41,36 +41,36 @@ public class MethodMocker
 		{
 			return mockClass;
 		}
-		
+
 		public String getOwner()
 		{
 			return mockClass.name;
 		}
-		
+
 		public String getName()
 		{
 			return mockMethod.name;
 		}
-		
+
 		public String getDescriptor()
 		{
 			return mockMethod.desc;
 		}
-		
+
 		public InsnList getInstructions()
 		{
 			return mockMethod.instructions;
 		}
 	}
-	
+
 	public static MockMethod mock(Class<?> returnType, Consumer<MethodVisitor> bodyGenerator)
-	{	
+	{
 		ClassWriter mockClassWriter = new ClassWriter(COMPUTE_FRAMES);
 
 		StringBuilder descriptorBuilder = new StringBuilder("()");
 		descriptorBuilder.append(Type.getDescriptor(returnType));
 		String descriptor = descriptorBuilder.toString();
-		
+
 		mockClassWriter.visit(V1_8, ACC_PUBLIC, CLASS_NAME, NO_SIGNATURE, OBJECT_SUPERCLASS, NO_INTERFACES);
 		{
 			MethodVisitor mockWriter = mockClassWriter.visitMethod(ACC_PUBLIC | ACC_STATIC, METHOD_NAME, descriptor, NO_SIGNATURE, NO_EXCEPTIONS);

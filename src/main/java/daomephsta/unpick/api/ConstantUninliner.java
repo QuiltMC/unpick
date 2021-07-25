@@ -29,7 +29,7 @@ import daomephsta.unpick.impl.UnpickValue;
 import daomephsta.unpick.impl.representations.ReplacementInstructionGenerator.Context;
 import daomephsta.unpick.impl.representations.ReplacementSet;
 /**
- * Uninlines inlined values 
+ * Uninlines inlined values
  * @author Daomephsta
  */
 public class ConstantUninliner
@@ -38,27 +38,27 @@ public class ConstantUninliner
 	private final IClassResolver classResolver;
 	private final IConstantMapper mapper;
 	private final IConstantResolver constantResolver;
-	private final Map<MethodTriple, MethodTriple> lambdaSAMs = new HashMap<>(); 
+	private final Map<MethodTriple, MethodTriple> lambdaSAMs = new HashMap<>();
 
 	/**
 	 * Constructs a new instance of ConstantUninliner that maps
 	 * values to constants with {@code mapper}.
 	 * @param classResolver used to resolve target classes and the classes necessary to transform them
 	 * @param mapper an instance of IConstantMapper.
-	 * @param constantResolver an instance of IConstantResolver for resolving constant types and 
+	 * @param constantResolver an instance of IConstantResolver for resolving constant types and
 	 * values.
 	 */
 	public ConstantUninliner(IClassResolver classResolver, IConstantMapper mapper, IConstantResolver constantResolver)
 	{
 		this(classResolver, mapper, constantResolver, Logger.getLogger("unpick"));
 	}
-	
+
 	/**
 	 * Constructs a new instance of ConstantUninliner that maps
 	 * values to constants with {@code mapper}.
 	 * @param classResolver used to resolve target classes and the classes necessary to transform them
 	 * @param mapper an instance of IConstantMapper.
-	 * @param constantResolver an instance of IConstantResolver for resolving constant types and 
+	 * @param constantResolver an instance of IConstantResolver for resolving constant types and
 	 * values.
 	 * @param logger a logger for debug logging.
 	 */
@@ -76,7 +76,7 @@ public class ConstantUninliner
 	 * @return the transformed class as a ClassNode
 	 */
 	public ClassNode transform(String className)
-	{	
+	{
 		ClassNode classNode = classResolver.resolveClassNode(className);
 		for (MethodNode method : classNode.methods)
 		{
@@ -86,12 +86,12 @@ public class ConstantUninliner
 	}
 
 	/**
-	 * Uninlines all inlined values in the specified method. 
+	 * Uninlines all inlined values in the specified method.
 	 * @param owner the binary name of the class that owns {@code method}
 	 * @param name the name of the method to transform
-	 * @param desc the descriptor of the method to transform 
-	 * @return the class node corresponding to {@code owner} with uninlining 
-	 * applied to the target method. Other methods in the class node will also be 
+	 * @param desc the descriptor of the method to transform
+	 * @return the class node corresponding to {@code owner} with uninlining
+	 * applied to the target method. Other methods in the class node will also be
 	 * transformed if they are part of the target from a source perspective (e.g. lambdas).
 	 */
 	public ClassNode transformMethod(String owner, String name, String desc)
@@ -100,12 +100,12 @@ public class ConstantUninliner
 		transformMethod(ownerClass, findMethod(ownerClass, name, desc));
 		return ownerClass;
 	}
-	
+
 	private ClassNode transformMethod(ClassNode methodOwner, MethodNode method)
 	{
 		logger.log(Level.INFO, String.format("Processing %s.%s%s", methodOwner, method.name, method.desc));
 		try
-		{ 
+		{
 			ReplacementSet replacementSet = new ReplacementSet(method.instructions);
 			Frame<UnpickValue>[] frames = new Analyzer<>(new UnpickInterpreter(method)).analyze(methodOwner.name, method);
 
@@ -204,7 +204,7 @@ public class ConstantUninliner
 				int paramIndex = hasThis ? methodUsage.getParamIndex() - 1 : methodUsage.getParamIndex();
 				if (!mapper.targetsParameter(lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex))
 					return null;
-				logger.log(Level.INFO, String.format("Using lambda %s.%s%s captured parameter %d", 
+				logger.log(Level.INFO, String.format("Using lambda %s.%s%s captured parameter %d",
 					lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex));
 				return context -> mapper.mapParameter(lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex, context);
 			}
@@ -218,7 +218,7 @@ public class ConstantUninliner
 				return null;
 			if (!mapper.targetsParameter(methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex()))
 				return null;
-			logger.log(Level.INFO, String.format("Using method invocation %s.%s%s parameter %d", 
+			logger.log(Level.INFO, String.format("Using method invocation %s.%s%s parameter %d",
 				methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex()));
 			return context -> mapper.mapParameter(methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex(), context);
 		}
@@ -247,7 +247,7 @@ public class ConstantUninliner
 					return null;
 				if (!mapper.targetsReturn(sam.owner, sam.name, sam.descriptor))
 					return null;
-				logger.log(Level.INFO, String.format("Using lambda SAM %s.%s%s return type", 
+				logger.log(Level.INFO, String.format("Using lambda SAM %s.%s%s return type",
 					sam.owner, sam.name, sam.descriptor));
 				return context -> mapper.mapReturn(sam.owner, sam.name, sam.descriptor, context);
 			}
@@ -255,11 +255,11 @@ public class ConstantUninliner
 				return null;
 			if (!mapper.targetsReturn(methodOwner, enclosingMethod.name, enclosingMethod.desc))
 				return null;
-			logger.log(Level.INFO, String.format("Using enclosing method %s.%s%s return type", 
+			logger.log(Level.INFO, String.format("Using enclosing method %s.%s%s return type",
 				methodOwner, enclosingMethod.name, enclosingMethod.desc));
 			return context -> mapper.mapReturn(methodOwner, enclosingMethod.name, enclosingMethod.desc, context);
 		}
-		
+
 		if (usage.getType() == AbstractInsnNode.INVOKE_DYNAMIC_INSN)
 		{
 			InvokeDynamicInsnNode invokeDynamic = (InvokeDynamicInsnNode) usage;
@@ -267,7 +267,7 @@ public class ConstantUninliner
 			{
 				Handle implementation = (Handle) invokeDynamic.bsmArgs[1];
 				ClassNode lambdaOwner = classResolver.resolveClassNode(implementation.getOwner());
-				MethodNode lambda = findMethod(lambdaOwner, 
+				MethodNode lambda = findMethod(lambdaOwner,
 					implementation.getName(), implementation.getDesc());
 				String samOwner = Type.getMethodType(invokeDynamic.desc).getReturnType().getInternalName();
 				String samName = invokeDynamic.name;
@@ -292,10 +292,10 @@ public class ConstantUninliner
 
 	private boolean createsLambda(InvokeDynamicInsnNode invokeDynamicInsn)
 	{
-		return "java/lang/invoke/LambdaMetafactory".equals(invokeDynamicInsn.bsm.getOwner()) && 
+		return "java/lang/invoke/LambdaMetafactory".equals(invokeDynamicInsn.bsm.getOwner()) &&
 			"metafactory".equals(invokeDynamicInsn.bsm.getName());
 	}
-	
+
 	private static class MethodTriple
 	{
 		String owner, name, descriptor;
@@ -306,8 +306,8 @@ public class ConstantUninliner
 			this.name = name;
 			this.descriptor = descriptor;
 		}
-		
-		static MethodTriple fromHandle(Handle handle) 
+
+		static MethodTriple fromHandle(Handle handle)
 		{
 			return new MethodTriple(handle.getOwner(), handle.getName(), handle.getDesc());
 		}
@@ -324,8 +324,8 @@ public class ConstantUninliner
 			if (this == obj) return true;
 			if (!(obj instanceof MethodTriple)) return false;
 			MethodTriple other = (MethodTriple) obj;
-			return Objects.equals(descriptor, other.descriptor) && 
-				   Objects.equals(name, other.name) && 
+			return Objects.equals(descriptor, other.descriptor) &&
+				   Objects.equals(name, other.name) &&
 				   Objects.equals(owner, other.owner);
 		}
 
@@ -333,6 +333,6 @@ public class ConstantUninliner
 		public String toString()
 		{
 			return owner + "." + name + descriptor;
-		} 
-	} 
+		}
+	}
 }

@@ -11,12 +11,12 @@ import daomephsta.unpick.impl.representations.ReplacementInstructionGenerator.Co
 public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 {
 	protected final Map<String, AbstractConstantGroup<?>> constantGroups;
-	
+
 	protected SimpleAbstractConstantMapper(Map<String, AbstractConstantGroup<?>> constantGroups)
 	{
 		this.constantGroups = constantGroups;
 	}
-	
+
 	protected abstract TargetMethods getTargetMethods();
 
 	@Override
@@ -24,16 +24,16 @@ public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 	{
 		return getTargetMethods().targets(methodOwner, methodName, methodDescriptor);
 	}
-	
+
 	@Override
 	public boolean targetsParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
 		return getTargetMethods().targetsParameter(methodOwner, methodName, methodDescriptor, parameterIndex);
 	}
-	
+
 	@Override
 	public void mapParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex, Context context)
-	{	
+	{
 		String constantGroupID = getTargetMethods().getParameterConstantGroup(methodOwner, methodName, methodDescriptor, parameterIndex);
 		ReplacementInstructionGenerator constantGroup = constantGroups.get(constantGroupID);
 		if (constantGroup == null)
@@ -46,20 +46,20 @@ public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 			context.getLogger().log(Level.INFO, "Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
 			return;
 		}
-		
+
 		constantGroup.generateReplacements(context);
 		context.getLogger().log(Level.INFO, "Transformation complete");
 	}
-	
+
 	@Override
 	public boolean targetsReturn(String methodOwner, String methodName, String methodDescriptor)
 	{
 		return getTargetMethods().targetsReturn(methodOwner, methodName, methodDescriptor);
 	}
-	
+
 	@Override
 	public void mapReturn(String methodOwner, String methodName, String methodDescriptor, Context context)
-	{	
+	{
 		String constantGroupID = getTargetMethods().getReturnConstantGroup(methodOwner, methodName, methodDescriptor);
 		ReplacementInstructionGenerator constantGroup = constantGroups.get(constantGroupID);
 		if (constantGroup == null)
@@ -72,7 +72,7 @@ public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 			context.getLogger().log(Level.INFO, "Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
 			return;
 		}
-		
+
 		constantGroup.generateReplacements(context);
 		context.getLogger().log(Level.INFO, "Transformation complete");
 	}

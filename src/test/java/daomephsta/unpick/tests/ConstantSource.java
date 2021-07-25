@@ -20,15 +20,15 @@ class ConstantSource
 							  SHORT_CONST_4 = 4,
 							  SHORT_CONST_5 = 5,
 							  SHORT_CONST = 257;
-	
+
 	public static final char CHAR_CONST_0 = '\0',
-		                     CHAR_CONST_1 = '\1',
-		                     CHAR_CONST_2 = '\2',
-		                     CHAR_CONST_3 = '\3',
-		                     CHAR_CONST_4 = '\4',
-		                     CHAR_CONST_5 = '\5',
-		                     CHAR_CONST = '\257';
-	
+							 CHAR_CONST_1 = '\1',
+							 CHAR_CONST_2 = '\2',
+							 CHAR_CONST_3 = '\3',
+							 CHAR_CONST_4 = '\4',
+							 CHAR_CONST_5 = '\5',
+							 CHAR_CONST = '\257';
+
 	public static final int INT_CONST_M1 = -1,
 							INT_CONST_0 = 0,
 							INT_CONST_1 = 1,
@@ -41,16 +41,16 @@ class ConstantSource
 	public static final long LONG_CONST_0 = 0,
 							 LONG_CONST_1 = 1,
 							 LONG_CONST = 1234567890;
-	
+
 	public static final float FLOAT_CONST_0 = 0F,
 							  FLOAT_CONST_1 = 1F,
 							  FLOAT_CONST_2 = 2F,
 							  FLOAT_CONST = 5.3F;
-	
+
 	public static final double DOUBLE_CONST_0 = 0D,
 							   DOUBLE_CONST_1 = 1D,
 							   DOUBLE_CONST = 5.3D;
-	
+
 	public static final String STRING_CONST_FOO = "foo",
 					   		   STRING_CONST_BAR = "bar";
 }

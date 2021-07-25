@@ -16,16 +16,16 @@ public interface IClassResolver
 	 * or no class can be found with the specified binary name.
 	 */
 	public ClassReader resolveClassReader(String binaryName) throws ClassResolutionException;
-	
+
 	/**
 	 * @param binaryName the binary name of the class to resolve
-	 * @return a {@link ClassNode} for the resolved class. If {@code a.equals(b)} then 
+	 * @return a {@link ClassNode} for the resolved class. If {@code a.equals(b)} then
 	 * it must be true that<br>{@code resolveClassNode(a) == resolveClassNode(b)}.
 	 * @throws ClassResolutionException if construction of the ClassReader throws an IOException
 	 * or no class can be found with the specified binary name.
 	 */
 	public ClassNode resolveClassNode(String binaryName) throws ClassResolutionException;
-	
+
 	public static class ClassResolutionException extends RuntimeException
 	{
 		private static final long serialVersionUID = 4617765695823272821L;

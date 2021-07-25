@@ -20,15 +20,15 @@ class MethodMockingClassResolver implements IClassResolver
 			throw new IllegalStateException("Mock class in use");
 		return mock;
 	}
-	
+
 	@Override
 	public ClassReader resolveClassReader(String className) throws ClassResolutionException
 	{
-		try 
+		try
 		{
 			return new ClassReader(className);
-		} 
-		catch (IOException e) 
+		}
+		catch (IOException e)
 		{
 			throw new IClassResolver.ClassResolutionException(e);
 		}
@@ -37,7 +37,7 @@ class MethodMockingClassResolver implements IClassResolver
 	@Override
 	public ClassNode resolveClassNode(String className) throws ClassResolutionException
 	{
-		return cache.computeIfAbsent(className, name -> 
+		return cache.computeIfAbsent(className, name ->
 		{
 			ClassNode node = new ClassNode();
 			resolveClassReader(name).accept(node, ClassReader.SKIP_DEBUG);

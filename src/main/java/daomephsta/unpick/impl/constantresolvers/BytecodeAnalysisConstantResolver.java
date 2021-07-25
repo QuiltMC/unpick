@@ -18,10 +18,10 @@ import daomephsta.unpick.impl.LiteralType;
 public class BytecodeAnalysisConstantResolver implements IConstantResolver
 {
 	private static final Set<Type> VALID_CONSTANT_TYPES = Arrays.stream(LiteralType.values()).map(LiteralType::getType).collect(toSet());
-	
+
 	private final Map<String, ResolvedConstants> constantDataCache = new HashMap<>();
 	private final IClassResolver classResolver;
-	
+
 	public BytecodeAnalysisConstantResolver(IClassResolver classResolver)
 	{
 		this.classResolver = classResolver;
@@ -40,7 +40,7 @@ public class BytecodeAnalysisConstantResolver implements IConstantResolver
 		cr.accept(resolvedConstants, 0);
 		return resolvedConstants;
 	}
-	
+
 	private static class ResolvedConstants extends ClassVisitor
 	{
 		public ResolvedConstants(int api)
@@ -61,7 +61,7 @@ public class BytecodeAnalysisConstantResolver implements IConstantResolver
 			}
 			return super.visitField(access, name, descriptor, signature, value);
 		}
-		
+
 		public ResolvedConstant get(Object key)
 		{
 			return resolvedConstants.get(key);

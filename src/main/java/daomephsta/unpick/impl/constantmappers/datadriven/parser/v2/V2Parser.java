@@ -34,13 +34,13 @@ public class V2Parser implements Visitor
 			unpickDefinitions.accept(new V2Parser(constantGroups, targetMethodsBuilder));
 		}
 	}
-	
+
 	@Override
 	public void visitLineNumber(int lineNumber)
 	{
 		this.lineNumber = lineNumber;
 	}
-	
+
 	@Override
 	public void visitSimpleConstantDefinition(String groupId, String owner, String name, String value, String descriptor)
 	{
@@ -56,7 +56,7 @@ public class V2Parser implements Visitor
 	{
 		if (value != null && descriptor != null)
 		{
-			try 
+			try
 			{
 				return new SimpleConstantDefinition(owner, name, Type.getType(descriptor), value);
 			}
@@ -83,7 +83,7 @@ public class V2Parser implements Visitor
 	{
 		if (value != null && descriptor != null)
 		{
-			try 
+			try
 			{
 				return new FlagDefinition(owner, name, Type.getType(descriptor), value);
 			}
@@ -100,12 +100,12 @@ public class V2Parser implements Visitor
 	{
 		return new TargetMethodParser(targetMethodsBuilder.targetMethod(owner, name, Type.getType(descriptor)), () -> lineNumber);
 	}
-	
+
 	private static class TargetMethodParser implements TargetMethodDefinitionVisitor
 	{
 		private final TargetMethods.TargetMethodBuilder targetMethodBuilder;
 		private final IntSupplier lineNumber;
-		
+
 		public TargetMethodParser(TargetMethodBuilder targetMethodBuilder, IntSupplier lineNumber)
 		{
 			this.targetMethodBuilder = targetMethodBuilder;
@@ -115,7 +115,7 @@ public class V2Parser implements Visitor
 		@Override
 		public void visitParameterGroupDefinition(int parameterIndex, String group)
 		{
-			try 
+			try
 			{
 				targetMethodBuilder.parameterGroup(parameterIndex, group);
 			}
@@ -137,7 +137,7 @@ public class V2Parser implements Visitor
 				throw new UnpickSyntaxException(lineNumber.getAsInt(), e.getMessage());
 			}
 		}
-		
+
 		@Override
 		public void endVisit()
 		{
