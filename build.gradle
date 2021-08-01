@@ -43,6 +43,11 @@ allprojects {
 
     java {
         withSourcesJar()
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        archiveClassifier = 'javadoc'
+        from javadoc.destinationDir
         withJavadocJar()
     }
 
