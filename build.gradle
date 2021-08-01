@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 
-    group = 'org.quiltmc.unpick'
+    group = 'net.fabricmc.unpick'
 
     def ENV = System.getenv()
     version = "2.2.0"
@@ -67,12 +67,6 @@ allprojects {
             mavenJava(MavenPublication) {
                 from components.java
                 artifact(javadocJar)
-            }
-
-            mavenJavaFabricGroup(MavenPublication) {
-                from components.java
-                artifact(javadocJar)
-                groupId("net.fabricmc.unpick")
             }
         }
     }
