@@ -8,7 +8,7 @@ allprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 
-    group = 'net.fabricmc.unpick'
+    group = 'org.quiltmc.unpick'
 
     def ENV = System.getenv()
     version = "2.2.0"
@@ -43,18 +43,14 @@ allprojects {
 
     java {
         withSourcesJar()
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        archiveClassifier = 'javadoc'
-        from javadoc.destinationDir
+        withJavadocJar()
     }
 
     publishing {
         repositories {
             if (ENV.MAVEN_URL) {
                 repositories.maven {
-                    name "fabric"
+                    name "Quilt"
                     url ENV.MAVEN_URL
                     credentials {
                         username ENV.MAVEN_USERNAME
