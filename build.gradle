@@ -68,6 +68,12 @@ allprojects {
                 from components.java
                 artifact(javadocJar)
             }
+
+            mavenJavaFabricGroup(MavenPublication) {
+                from components.java
+                artifact(javadocJar)
+                groupId("net.fabricmc.unpick")
+            }
         }
     }
 }
