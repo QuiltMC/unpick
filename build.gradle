@@ -48,7 +48,6 @@ allprojects {
     task javadocJar(type: Jar, dependsOn: javadoc) {
         archiveClassifier = 'javadoc'
         from javadoc.destinationDir
-        withJavadocJar()
     }
 
     publishing {
