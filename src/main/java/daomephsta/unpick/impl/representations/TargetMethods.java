@@ -27,7 +27,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 	public boolean targets(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		if (targetMethod == null)
 			return false;
 		return targetMethod.implementedBy(classResolver, methodOwner);
@@ -35,25 +35,25 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 	public boolean targetsParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.hasParameterConstantGroup(parameterIndex);
 	}
 
 	public boolean targetsReturn(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.hasReturnConstantGroup();
 	}
 
 	public String getParameterConstantGroup(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.getParameterConstantGroup(parameterIndex);
 	}
 
 	public String getReturnConstantGroup(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.getReturnConstantGroup();
 	}
 
@@ -111,13 +111,13 @@ public class TargetMethods implements Iterable<TargetMethod>
 		{
 			String existingGroup = parameterConstantGroups.putIfAbsent(parameterIndex, constantGroup);
 			if (existingGroup != null)
-				throw duplicateParameterGroup(parameterIndex, existingGroup);
+				throw duplicateParameterGroup(parameterIndex, existingGroup, constantGroup);
 			return this;
 		}
 		public TargetMethodBuilder returnGroup(String constantGroup)
 		{
 			if (returnConstantGroup != null)
-				throw duplicateReturnGroup(constantGroup);
+				throw duplicateReturnGroup(returnConstantGroup, constantGroup);
 			else
 				returnConstantGroup = constantGroup;
 			return this;
@@ -125,7 +125,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 		public Builder add()
 		{
-			parent.targetMethods.compute(name + descriptor, (key, existing) -> 
+			parent.targetMethods.compute(owner + ";" + name + descriptor, (key, existing) ->
 			{
 				if (existing != null)
 				{
@@ -136,14 +136,20 @@ public class TargetMethods implements Iterable<TargetMethod>
 					else if (returnConstantGroup != null && existing.returnConstantGroup == null)
 						/*NO OP*/;
 					else if (!Objects.equals(existing.returnConstantGroup, returnConstantGroup))
-						throw duplicateReturnGroup(existing.returnConstantGroup);
+						throw duplicateReturnGroup(existing.returnConstantGroup, returnConstantGroup);
 
 					// Merge parameterConstantGroups, throwing on duplicate keys
 					// Note that exceptions always use keys & values from the existing TargetMethod
 					for (Entry<Integer, String> entry : existing.parameterConstantGroups.entrySet()) 
 					{
-						if (parameterConstantGroups.putIfAbsent(entry.getKey(), entry.getValue()) != null)
-							throw duplicateParameterGroup(entry.getKey(), entry.getValue());
+						String oldGroup = parameterConstantGroups.putIfAbsent(entry.getKey(), entry.getValue());
+						if (oldGroup != null) {
+							if (oldGroup.equals(entry.getValue())) {
+								return existing;
+							}
+							throw duplicateParameterGroup(entry.getKey(), oldGroup, entry.getValue());
+						}
+
 					}
 				}
 				return new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup);
@@ -151,15 +157,15 @@ public class TargetMethods implements Iterable<TargetMethod>
 			return parent;
 		}
 
-		private DuplicateMappingException duplicateParameterGroup(int index, String group) 
+		private DuplicateMappingException duplicateParameterGroup(int index, String group, String newGroup)
 		{
-			return new DuplicateMappingException("Parameter " + index + " is already mapped to constant group " + group);
+			return new DuplicateMappingException("Parameter " + index + " for method " + name + " is already mapped to constant group " + group + ". Cannot assign group " + newGroup + " to it.");
 		}
 
 
-		private DuplicateMappingException duplicateReturnGroup(String group) 
+		private DuplicateMappingException duplicateReturnGroup(String group, String newGroup)
 		{
-			return new DuplicateMappingException("Return is already mapped to constant group " + group);
+			return new DuplicateMappingException("Return for method " + name + "is already mapped to constant group " + group + ". Cannot assign group " + newGroup + " to it.");
 		}
 	}
 

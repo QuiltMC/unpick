@@ -131,7 +131,7 @@ public class Main {
 
 		@Override
 		public ClassReader resolveClassReader(String internalName) throws ClassResolutionException {
-			InputStream inputStream = classLoader.getResourceAsStream(internalName + ".class");
+			InputStream inputStream = classLoader.getResourceAsStream(internalName.replace('.', '/') + ".class");
 
 			if (inputStream != null) {
 				try {
