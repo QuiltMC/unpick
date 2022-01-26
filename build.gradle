@@ -11,8 +11,8 @@ allprojects {
     group = 'net.fabricmc.unpick'
 
     def ENV = System.getenv()
-    version = "3.0.0" + (ENV.SNAPSHOT_URL ? "-SNAPSHOT": "")
-    version = version + (ENV.GITHUB_ACTIONS ?: "+local")
+    version = "3.0.0" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
+    version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
