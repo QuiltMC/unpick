@@ -14,10 +14,10 @@ import daomephsta.unpick.impl.representations.TargetMethods.TargetMethodBuilder;
 public enum V1Parser
 {
 	INSTANCE;
-	
+
 	private static final Pattern WHITESPACE_SPLITTER = Pattern.compile("\\s");
-	
-	public void parse(InputStream mappingSource, Map<String, ReplacementInstructionGenerator> constantGroups, TargetMethods.Builder targetMethodsBuilder) throws IOException
+
+	public void parse(InputStream mappingSource, Map<String, AbstractConstantGroup<?>> constantGroups, TargetMethods.Builder targetMethodsBuilder) throws IOException
 	{
 		try(LineNumberReader reader = new LineNumberReader(new InputStreamReader(mappingSource)))
 		{
@@ -39,14 +39,14 @@ public enum V1Parser
 
 					String group = tokens[1];
 					SimpleConstantDefinition parsedConstant = parseConstantDefinition(tokens, reader.getLineNumber());
-					ReplacementInstructionGenerator constantGroup = constantGroups.get(group);
+					AbstractConstantGroup<?> constantGroup = constantGroups.get(group);
 					if (constantGroup == null)
 					{
 						constantGroups.put(group, (constantGroup = new SimpleConstantGroup(group)));
 					}
 					if (constantGroup instanceof SimpleConstantGroup)
 						((SimpleConstantGroup) constantGroup).add(parsedConstant);
-					else 
+					else
 						throw new UnpickSyntaxException(reader.getLineNumber(), "Cannot add simple constant to non-simple constant group of type " + constantGroup.getClass().getSimpleName());
 					break;
 				}
@@ -58,14 +58,14 @@ public enum V1Parser
 
 					String group = tokens[1];
 					FlagDefinition parsedFlag = parseFlagDefinition(tokens, reader.getLineNumber());
-					ReplacementInstructionGenerator constantGroup = constantGroups.get(group);
+					AbstractConstantGroup<?> constantGroup = constantGroups.get(group);
 					if (constantGroup == null)
 					{
 						constantGroups.put(group, (constantGroup = new FlagConstantGroup(group)));
 					}
 					if (constantGroup instanceof FlagConstantGroup)
 						((FlagConstantGroup) constantGroup).add(parsedFlag);
-					else 
+					else
 						throw new UnpickSyntaxException(reader.getLineNumber(), "Cannot add flag to non-flag group of type " + constantGroup.getClass().getSimpleName());
 					break;
 				}
@@ -80,7 +80,7 @@ public enum V1Parser
 			}
 		}
 	}
-	
+
 	private String stripComment(String in)
 	{
 		int c = in.indexOf('#');
@@ -100,15 +100,15 @@ public enum V1Parser
 	}
 
 	private SimpleConstantDefinition parseConstantDefinition(String[] tokens, int lineNumber)
-	{ 
+	{
 		String owner = tokens[2];
 		String name = tokens[3];
-		
+
 		if (tokens.length > 4)
 		{
-			try 
+			try
 			{
-				Type descriptor = Type.getType(tokens[5]); 
+				Type descriptor = Type.getType(tokens[5]);
 				String value = tokens[4];
 				return new SimpleConstantDefinition(owner, name, descriptor, value);
 			}
@@ -117,20 +117,20 @@ public enum V1Parser
 				throw new UnpickSyntaxException(lineNumber, "Unable to parse descriptor " + tokens[4]);
 			}
 		}
-		
+
 		return new SimpleConstantDefinition(owner, name);
 	}
-	
+
 	private FlagDefinition parseFlagDefinition(String[] tokens, int lineNumber)
-	{ 
+	{
 		String owner = tokens[2];
 		String name = tokens[3];
-		
+
 		if (tokens.length > 4)
 		{
-			try 
+			try
 			{
-				Type descriptor = Type.getType(tokens[5]); 
+				Type descriptor = Type.getType(tokens[5]);
 				String value = tokens[4];
 				return new FlagDefinition(owner, name, descriptor, value);
 			}
@@ -139,7 +139,7 @@ public enum V1Parser
 				throw new UnpickSyntaxException(lineNumber, "Unable to parse descriptor " + tokens[4]);
 			}
 		}
-		
+
 		return new FlagDefinition(owner, name);
 	}
 
@@ -147,11 +147,11 @@ public enum V1Parser
 	{
 		if (tokens.length < 4 || tokens.length % 2 != 0)
 			throw new UnpickSyntaxException(lineNumber, "Unexpected token count. Expected an even number greater than or equal to 4. Found " + tokens.length);
-		
+
 		String owner = tokens[1];
 		String name = tokens[2];
-		
-		try 
+
+		try
 		{
 			Type methodType = Type.getMethodType(tokens[3]);
 			TargetMethodBuilder targetMethodBuilder = targetMethodsBuilder.targetMethod(owner, name, methodType);

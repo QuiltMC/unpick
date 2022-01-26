@@ -17,12 +17,12 @@ public class FlagConstantGroup extends AbstractConstantGroup<FlagDefinition>
 {
 	private static final Logger LOGGER = Logger.getLogger("unpick");
 	private final Collection<FlagDefinition> resolvedConstantDefinitions = new ArrayList<>();
-	
+
 	public FlagConstantGroup(String id)
 	{
 		super(id);
 	}
-	
+
 	/**
 	 * Adds a flag to this group.
 	 * @param flagDefinition a constant definition.
@@ -33,7 +33,7 @@ public class FlagConstantGroup extends AbstractConstantGroup<FlagDefinition>
 		LOGGER.info("Loaded " + flagDefinition + " into '" + getId() + "'");
 		if (flagDefinition.isResolved())
 			resolvedConstantDefinitions.add(flagDefinition);
-		else 
+		else
 			unresolvedConstantDefinitions.add(flagDefinition);
 	}
 
@@ -45,14 +45,12 @@ public class FlagConstantGroup extends AbstractConstantGroup<FlagDefinition>
 		Object literalObj = AbstractInsnNodes.getLiteralValue(context.getArgSeed());
 		return literalObj instanceof Integer || literalObj instanceof Long;
 	}
-	
+
 	@Override
 	public void generateReplacements(Context context)
 	{
 		Number literalNum = (Number) AbstractInsnNodes.getLiteralValue(context.getArgSeed());
 		IntegerType integerType = IntegerType.from(literalNum);
-
-		resolveAllConstants(context.getConstantResolver());
 
 		long literal = integerType.toUnsignedLong(literalNum);
 		if (literal == 0 || literal == -1)
@@ -130,7 +128,7 @@ public class FlagConstantGroup extends AbstractConstantGroup<FlagDefinition>
 		}
 		return residual;
 	}
-	
+
 	@Override
 	protected void acceptResolved(FlagDefinition definition)
 	{

@@ -27,7 +27,7 @@ public class UnpickV2Remapper implements Visitor
 	 * Creates a new {@link UnpickV2Remapper}.
 	 * @param classMappings a mapping of old class names to new class names.
 	 * @param methodMappings a mapping of old method names, owner classes, and descriptors; to new method names.
-	 * @param delegate the visitor that should visit the remapped target method definitions. 
+	 * @param delegate the visitor that should visit the remapped target method definitions.
 	 * All other visitor methods only delegate to the delegate visitor.
 	 */
 	public UnpickV2Remapper(Map<String, String> classMappings, Map<MethodKey, String> methodMappings, Visitor delegate)
@@ -88,8 +88,8 @@ public class UnpickV2Remapper implements Visitor
 	{
 		//Reassigning the parameters tends to cause bugs
 		String remappedOwner = remapClass(owner),
-		       remappedName = remapMethod(owner, name, descriptor),
-		       remappedDescriptor = remapDescriptor(descriptor);
+			   remappedName = remapMethod(owner, name, descriptor),
+			   remappedDescriptor = remapDescriptor(descriptor);
 
 		return delegate.visitTargetMethodDefinition(remappedOwner, remappedName, remappedDescriptor);
 	}
@@ -108,8 +108,8 @@ public class UnpickV2Remapper implements Visitor
 	{
 		//Reassigning the parameters tends to cause bugs
 		String remappedOwner = remapClass(owner),
-		       remappedName = remapField(owner, name),
-		       remappedDescriptor = remapDescriptor(descriptor);
+			   remappedName = remapField(owner, name),
+			   remappedDescriptor = remapDescriptor(descriptor);
 
 		delegate.visitSimpleConstantDefinition(group, remappedOwner, remappedName, value, remappedDescriptor);
 	}
@@ -118,8 +118,8 @@ public class UnpickV2Remapper implements Visitor
 	{
 		//Reassigning the parameters tends to cause bugs
 		String remappedOwner = remapClass(owner),
-		       remappedName = remapField(owner, name),
-		       remappedDescriptor = remapDescriptor(descriptor);
+			   remappedName = remapField(owner, name),
+			   remappedDescriptor = remapDescriptor(descriptor);
 
 		delegate.visitFlagConstantDefinition(group, remappedOwner, remappedName, value, remappedDescriptor);
 	}

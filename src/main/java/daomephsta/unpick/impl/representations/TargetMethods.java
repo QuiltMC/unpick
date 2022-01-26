@@ -1,6 +1,7 @@
 package daomephsta.unpick.impl.representations;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import org.objectweb.asm.*;
 
@@ -18,7 +19,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 		this.classResolver = classResolver;
 		this.methods = methods;
 	}
-	
+
 	public static TargetMethods.Builder builder(IClassResolver classResolver)
 	{
 		return new TargetMethods.Builder(classResolver);
@@ -26,42 +27,42 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 	public boolean targets(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		if (targetMethod == null)
 			return false;
-		return targetMethod.implementedBy(classResolver, methodOwner);	
+		return targetMethod.implementedBy(classResolver, methodOwner);
 	}
 
 	public boolean targetsParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.hasParameterConstantGroup(parameterIndex);
 	}
-	
+
 	public boolean targetsReturn(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.hasReturnConstantGroup();
 	}
 
 	public String getParameterConstantGroup(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.getParameterConstantGroup(parameterIndex);
 	}
-	
+
 	public String getReturnConstantGroup(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodName + methodDescriptor);
+		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
 		return targetMethod.getReturnConstantGroup();
 	}
-	
+
 	@Override
 	public Iterator<TargetMethod> iterator()
 	{
 		return methods.values().iterator();
 	}
-	
+
 	@Override
 	public String toString()
 	{
@@ -88,7 +89,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 			return new TargetMethods(classResolver, targetMethods);
 		}
 	}
-	
+
 	public static class TargetMethodBuilder
 	{
 		private final Builder parent;
@@ -96,7 +97,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 		private final Type descriptor;
 		private final Map<Integer, String> parameterConstantGroups;
 		private String returnConstantGroup;
-		
+
 		TargetMethodBuilder(Builder parent, String owner, String name, Type descriptor)
 		{
 			this.parent = parent;
@@ -105,31 +106,69 @@ public class TargetMethods implements Iterable<TargetMethod>
 			this.descriptor = descriptor;
 			this.parameterConstantGroups = new HashMap<>(descriptor.getArgumentTypes().length);
 		}
-		
+
 		public TargetMethodBuilder parameterGroup(int parameterIndex, String constantGroup)
 		{
 			String existingGroup = parameterConstantGroups.putIfAbsent(parameterIndex, constantGroup);
 			if (existingGroup != null)
-				throw new DuplicateMappingException("Parameter " + parameterIndex + " is already mapped to constant group " + existingGroup);
+				throw duplicateParameterGroup(parameterIndex, existingGroup, constantGroup);
 			return this;
 		}
-		
 		public TargetMethodBuilder returnGroup(String constantGroup)
 		{
 			if (returnConstantGroup != null)
-				throw new DuplicateMappingException("Return is already mapped to constant group " + returnConstantGroup);
+				throw duplicateReturnGroup(returnConstantGroup, constantGroup);
 			else
 				returnConstantGroup = constantGroup;
 			return this;
 		}
-		
+
 		public Builder add()
 		{
-			parent.targetMethods.put(name + descriptor, new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup));
+			parent.targetMethods.compute(owner + ";" + name + descriptor, (key, existing) ->
+			{
+				if (existing != null)
+				{
+					// Find non-null returnConstantGroup, throw if both are non-null
+					// Note that exceptions always use values from the existing TargetMethod
+					if (returnConstantGroup == null && existing.returnConstantGroup != null)
+						returnConstantGroup = existing.returnConstantGroup;
+					else if (returnConstantGroup != null && existing.returnConstantGroup == null)
+						/*NO OP*/;
+					else if (!Objects.equals(existing.returnConstantGroup, returnConstantGroup))
+						throw duplicateReturnGroup(existing.returnConstantGroup, returnConstantGroup);
+
+					// Merge parameterConstantGroups, throwing on duplicate keys
+					// Note that exceptions always use keys & values from the existing TargetMethod
+					for (Entry<Integer, String> entry : existing.parameterConstantGroups.entrySet()) 
+					{
+						String oldGroup = parameterConstantGroups.putIfAbsent(entry.getKey(), entry.getValue());
+						if (oldGroup != null) {
+							if (oldGroup.equals(entry.getValue())) {
+								return existing;
+							}
+							throw duplicateParameterGroup(entry.getKey(), oldGroup, entry.getValue());
+						}
+
+					}
+				}
+				return new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup);
+			});
 			return parent;
 		}
+
+		private DuplicateMappingException duplicateParameterGroup(int index, String group, String newGroup)
+		{
+			return new DuplicateMappingException("Parameter " + index + " for method " + name + " is already mapped to constant group " + group + ". Cannot assign group " + newGroup + " to it.");
+		}
+
+
+		private DuplicateMappingException duplicateReturnGroup(String group, String newGroup)
+		{
+			return new DuplicateMappingException("Return for method " + name + "is already mapped to constant group " + group + ". Cannot assign group " + newGroup + " to it.");
+		}
 	}
-	
+
 	/**
 	 * Represents a method with parameters that may be inlined constants
 	 * @author Daomephsta
@@ -143,16 +182,16 @@ public class TargetMethods implements Iterable<TargetMethod>
 		private final Type descriptor;
 		private final Map<Integer, String> parameterConstantGroups;
 		private final String returnConstantGroup;
-		
+
 		/**
 		 * Constructs a new instance of TargetMethod with the specified parameters.
 		 * @param owner the internal name of the class that owns the represented method.
 		 * @param name the name of the represented method
 		 * @param descriptor the descriptor of the represented method.
 		 * @param parameterConstantGroups a Map that maps a parameter index to the name
-		 * of the constant group that contains all valid constants for that parameter. 
-		 * @param returnConstantGroup the id of the constant group containing all constants 
-		 * that are returned from the represented method and its implementations. 
+		 * of the constant group that contains all valid constants for that parameter.
+		 * @param returnConstantGroup the id of the constant group containing all constants
+		 * that are returned from the represented method and its implementations.
 		 */
 		public TargetMethod(String owner, String name, Type descriptor, Map<Integer, String> parameterConstantGroups, String returnConstantGroup)
 		{
@@ -162,43 +201,43 @@ public class TargetMethods implements Iterable<TargetMethod>
 			this.parameterConstantGroups = parameterConstantGroups;
 			this.returnConstantGroup = returnConstantGroup;
 		}
-		
+
 		/**
 		 * @param parameterIndex the index of the parameter.
-		 * @return the name of the constant group that contains all valid constants 
+		 * @return the name of the constant group that contains all valid constants
 		 * for the parameter with an index of {@code parameterIndex}
 		 */
 		public String getParameterConstantGroup(int parameterIndex)
 		{
 			return parameterConstantGroups.get(parameterIndex);
 		}
-		
+
 		/**
 		 * @param parameterIndex the index of the parameter.
-		 * @return true if a constant group mapping exists for the parameter 
+		 * @return true if a constant group mapping exists for the parameter
 		 * with an index of {@code parameterIndex}
-		 */ 
+		 */
 		public boolean hasParameterConstantGroup(int parameterIndex)
 		{
 			return parameterConstantGroups.containsKey(parameterIndex);
 		}
-		
+
 		/**
 		 * @return true if a constant group mapping exists for returns
-		 */ 
+		 */
 		public boolean hasReturnConstantGroup()
 		{
 			return returnConstantGroup != null;
 		}
-		
+
 		/**
 		 * @return the constant group mapping exists for returns
-		 */ 
+		 */
 		public String getReturnConstantGroup()
 		{
 			return returnConstantGroup;
 		}
-		
+
 		/**
 		 * @param classResolver a class resolver for resolving classes, if necessary
 		 * @param classInternalName the internal name of the potential implementor.
@@ -225,24 +264,24 @@ public class TargetMethods implements Iterable<TargetMethod>
 		@Override
 		public String toString()
 		{
-			return String.format("TargetMethod {Qualified Name: %s.%s, Descriptor: %s, Parameter Constant Groups: %s}", 
+			return String.format("TargetMethod {Qualified Name: %s.%s, Descriptor: %s, Parameter Constant Groups: %s}",
 				declarator, name, descriptor, parameterConstantGroups);
 		}
 	}
-	
+
 	private static class InheritanceChecker extends ClassVisitor
 	{
 		private final IClassResolver classResolver;
 		private final String targetOwner;
 		private boolean result = false;
-		
+
 		public static boolean inheritsFrom(int api, IClassResolver classResolver, String clazz, String targetOwner)
-		{ 
+		{
 			try
 			{
-				ClassReader classReader = classResolver.resolveClass(clazz);
+				ClassReader classReader = classResolver.resolveClassReader(clazz);
 				InheritanceChecker inheritanceChecker = new InheritanceChecker(api, classResolver, targetOwner);
-				classReader.accept(inheritanceChecker, 0); 
+				classReader.accept(inheritanceChecker, 0);
 				return inheritanceChecker.result;
 			}
 			catch (ClassResolutionException e)
@@ -271,7 +310,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 			{
 				if (superName != null && !superName.equals("java/lang/Object"))
 				{
-					ClassReader classReader = classResolver.resolveClass(superName);
+					ClassReader classReader = classResolver.resolveClassReader(superName);
 					classReader.accept(this, 0);
 					if (result) return;
 				}
@@ -279,7 +318,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 				{
 					for (String iface : interfaces)
 					{
-						ClassReader classReader = classResolver.resolveClass(iface);
+						ClassReader classReader = classResolver.resolveClassReader(iface);
 						classReader.accept(this, 0);
 						if (result) return;
 					}
@@ -291,7 +330,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 			}
 		}
 	}
-	
+
 	public static class DuplicateMappingException extends RuntimeException
 	{
 		public DuplicateMappingException(String message)

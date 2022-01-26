@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import daomephsta.unpick.api.IClassResolver;
+import daomephsta.unpick.api.constantresolvers.IConstantResolver;
 import daomephsta.unpick.constantmappers.datadriven.parser.UnpickSyntaxException;
 import daomephsta.unpick.impl.constantmappers.SimpleAbstractConstantMapper;
 import daomephsta.unpick.impl.constantmappers.datadriven.parser.V1Parser;
 import daomephsta.unpick.impl.constantmappers.datadriven.parser.v2.V2Parser;
+import daomephsta.unpick.impl.representations.AbstractConstantGroup;
 import daomephsta.unpick.impl.representations.TargetMethods;
 
 /**
@@ -17,11 +19,11 @@ import daomephsta.unpick.impl.representations.TargetMethods;
  * @author Daomephsta
  */
 public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
-{	
+{
 	private static final Logger LOGGER = Logger.getLogger("unpick");
 	private final TargetMethods targetMethods;
 
-	public DataDrivenConstantMapper(IClassResolver classResolver, InputStream... mappingSources)
+	public DataDrivenConstantMapper(IClassResolver classResolver, IConstantResolver constantResolver, InputStream... mappingSources)
 	{
 		super(new HashMap<>());
 		TargetMethods.Builder targetMethodsBuilder = TargetMethods.builder(classResolver);
@@ -29,7 +31,7 @@ public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 		{
 			try
 			{
-				//Avoid buffering, so that only the version specifier bytes are consumed 
+				//Avoid buffering, so that only the version specifier bytes are consumed
 				byte[] version = new byte [2];
 				mappingSource.read(version);
 				if (version[0] == 'v')
@@ -39,7 +41,7 @@ public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 					case '1':
 						V1Parser.INSTANCE.parse(mappingSource, constantGroups, targetMethodsBuilder);
 						break;
-						
+
 					case '2':
 						V2Parser.parse(mappingSource, constantGroups, targetMethodsBuilder);
 						break;
@@ -50,7 +52,7 @@ public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 				}
 				else
 					throw new UnpickSyntaxException(1, "Missing version");
-			} 
+			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
@@ -58,6 +60,15 @@ public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 		}
 		this.targetMethods = targetMethodsBuilder.build();
 		LOGGER.info("Loaded " + targetMethods);
+		boolean resolved = true;
+		for (AbstractConstantGroup<?> group : constantGroups.values())
+		{
+			group.resolveAllConstants(constantResolver);
+			if (!group.isResolved())
+				resolved = false;
+		}
+		if (!resolved)
+			throw new RuntimeException("One or more constants failed to resolve, check the log for details");
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public interface IConstantResolver
 	}
 
 	/**
-	 * Resolves the type and value of a constant 
+	 * Resolves the type and value of a constant
 	 * from its owning class and name.
 	 * @param owner the internal name of the class that owns the constant.
 	 * @param name the name of the constant.

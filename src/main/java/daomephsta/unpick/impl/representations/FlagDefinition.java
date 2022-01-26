@@ -15,7 +15,7 @@ public class FlagDefinition extends AbstractConstantDefinition<FlagDefinition>
 	/**
 	 * Constructs an instance of FlagDefinition that will
 	 * have its value and descriptor lazily resolved.
-	 * @param owner the internal name of the class that owns 
+	 * @param owner the internal name of the class that owns
 	 * the represented flag.
 	 * @param name the name of the represented flag.
 	 */
@@ -25,9 +25,9 @@ public class FlagDefinition extends AbstractConstantDefinition<FlagDefinition>
 	}
 
 	/**
-	 * Constructs an instance of FlagDefinition with the 
+	 * Constructs an instance of FlagDefinition with the
 	 * specified value and descriptor.
-	 * @param owner the internal name of the class that owns 
+	 * @param owner the internal name of the class that owns
 	 * the represented flag.
 	 * @param name the name of the represented flag.
 	 * @param descriptor the descriptor of the represented flag.
@@ -37,20 +37,20 @@ public class FlagDefinition extends AbstractConstantDefinition<FlagDefinition>
 	{
 		super(owner, name, descriptor, valueString);
 	}
-	
+
 	@Override
 	protected Number parseValue(String valueString)
 	{
-		try 
-		{ 
+		try
+		{
 			return IntegerType.from(descriptor).parse(valueString);
 		}
-		catch (IllegalArgumentException e) 
+		catch (IllegalArgumentException e)
 		{
-			throw new UnpickSyntaxException("Cannot parse value " + valueString + " with descriptor " + descriptor, e); 
+			throw new UnpickSyntaxException("Cannot parse value " + valueString + " with descriptor " + descriptor, e);
 		}
 	}
-	
+
 	@Override
 	protected void setValue(Object value) throws ResolutionException
 	{
@@ -65,19 +65,19 @@ public class FlagDefinition extends AbstractConstantDefinition<FlagDefinition>
 			throw new ResolutionException(value + " is not of a valid flag type", e);
 		}
 	}
-	
+
 	@Override
 	public Number getValue()
 	{
 		return (Number) super.getValue();
 	}
-	
+
 	@Override
 	public String toString()
 	{
 		if (isResolved())
 		{
-			return String.format("FlagDefinition {Qualified Name: %s.%s, Descriptor: %s, Bits: %s}", 
+			return String.format("FlagDefinition {Qualified Name: %s.%s, Descriptor: %s, Bits: %s}",
 					owner, name, descriptor, Long.toBinaryString(getValue().longValue()));
 		}
 		else

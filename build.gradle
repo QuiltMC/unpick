@@ -11,8 +11,8 @@ allprojects {
     group = 'net.fabricmc.unpick'
 
     def ENV = System.getenv()
-    version = "2.2.0"
-    version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
+    version = "3.0.0" + (ENV.SNAPSHOT_URL ? "-SNAPSHOT": "")
+    version = version + (ENV.GITHUB_ACTIONS ?: "+local")
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -59,6 +59,16 @@ allprojects {
                     credentials {
                         username ENV.MAVEN_USERNAME
                         password ENV.MAVEN_PASSWORD
+                    }
+                }
+            }
+            if (ENV.SNAPSHOTS_URL) {
+                repositories.maven {
+                    name "QuiltSnapshot"
+                    url ENV.SNAPSHOTS_URL
+                    credentials {
+                        username ENV.SNAPSHOTS_USERNAME
+                        password ENV.SNAPSHOTS_PASSWORD
                     }
                 }
             }

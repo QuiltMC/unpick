@@ -23,7 +23,7 @@ public class TargetImplementations
 		TargetInvocation targetMethod = methods.get(methodName + methodDescriptor);
 		if (targetMethod == null)
 			return false;
-		return targetMethod.implementedBy(classResolver, methodOwner);	
+		return targetMethod.implementedBy(classResolver, methodOwner);
 	}
 
 	public boolean targets(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
@@ -37,7 +37,7 @@ public class TargetImplementations
 		TargetInvocation targetMethod = methods.get(methodName + methodDescriptor);
 		return targetMethod.getParameterConstantGroup(parameterIndex);
 	}
-	
+
 	public static class Builder
 	{
 		private final IClassResolver classResolver;
@@ -58,7 +58,7 @@ public class TargetImplementations
 			return new TargetImplementations(classResolver, targetMethods);
 		}
 	}
-	
+
 	/**
 	 * Represents a method with parameters that may be inlined constants
 	 * @author Daomephsta
@@ -71,14 +71,14 @@ public class TargetImplementations
 								  nonimplementors = new HashSet<>();
 		private final Type descriptor;
 		private final Map<Integer, String> parameterConstantGroups;
-		
+
 		/**
 		 * Constructs a new instance of TargetMethod with the specified parameters.
 		 * @param owner the internal name of the class that owns the represented method.
 		 * @param name the name of the represented method
 		 * @param descriptor the descriptor of the represented method.
 		 * @param parameterConstantGroups a Map that maps a parameter index to the name
-		 * of the constant group that contains all valid constants for that parameter. 
+		 * of the constant group that contains all valid constants for that parameter.
 		 */
 		public TargetInvocation(String owner, String name, Type descriptor, Map<Integer, String> parameterConstantGroups)
 		{
@@ -87,27 +87,27 @@ public class TargetImplementations
 			this.descriptor = descriptor;
 			this.parameterConstantGroups = parameterConstantGroups;
 		}
-		
+
 		/**
 		 * @param parameterIndex the index of the parameter.
-		 * @return the name of the constant group that contains all valid constants 
+		 * @return the name of the constant group that contains all valid constants
 		 * for the parameter with an index of {@code parameterIndex}
 		 */
 		public String getParameterConstantGroup(int parameterIndex)
 		{
 			return parameterConstantGroups.get(parameterIndex);
 		}
-		
+
 		/**
 		 * @param parameterIndex the index of the parameter.
-		 * @return true if a constant group mapping exists for the parameter 
+		 * @return true if a constant group mapping exists for the parameter
 		 * with an index of {@code parameterIndex}
-		 */ 
+		 */
 		public boolean hasParameterConstantGroup(int parameterIndex)
 		{
 			return parameterConstantGroups.containsKey(parameterIndex);
 		}
-		
+
 		public boolean implementedBy(IClassResolver classResolver, String classInternalName)
 		{
 			if (declarator.equals(classInternalName) || implementors.contains(classInternalName))
@@ -129,25 +129,25 @@ public class TargetImplementations
 		@Override
 		public String toString()
 		{
-			return String.format("TargetMethod {Qualified Name: %s.%s, Descriptor: %s, Parameter Constant Groups: %s}", 
+			return String.format("TargetMethod {Qualified Name: %s.%s, Descriptor: %s, Parameter Constant Groups: %s}",
 				declarator, name, descriptor, parameterConstantGroups);
 		}
 	}
-	
+
 	private static class InheritanceChecker extends ClassVisitor
 	{
 		private final IClassResolver classResolver;
 		private final String targetOwner;
 		private boolean result = false;
-		
+
 		public static boolean inheritsFrom(int api, IClassResolver classResolver, String clazz, String targetOwner)
-		{ 
+		{
 			try
 			{
-				ClassReader classReader = classResolver.resolveClass(clazz);
-				InheritanceChecker inheritanceChecker 
+				ClassReader classReader = classResolver.resolveClassReader(clazz);
+				InheritanceChecker inheritanceChecker
 					= new InheritanceChecker(api, classResolver, targetOwner);
-				classReader.accept(inheritanceChecker, 0); 
+				classReader.accept(inheritanceChecker, 0);
 				return inheritanceChecker.result;
 			}
 			catch (ClassResolutionException e)
@@ -176,7 +176,7 @@ public class TargetImplementations
 			{
 				if (superName != null && !superName.equals("java/lang/Object"))
 				{
-					ClassReader classReader = classResolver.resolveClass(superName);
+					ClassReader classReader = classResolver.resolveClassReader(superName);
 					classReader.accept(this, 0);
 					if (result) return;
 				}
@@ -184,7 +184,7 @@ public class TargetImplementations
 				{
 					for (String iface : interfaces)
 					{
-						ClassReader classReader = classResolver.resolveClass(iface);
+						ClassReader classReader = classResolver.resolveClassReader(iface);
 						classReader.accept(this, 0);
 						if (result) return;
 					}

@@ -15,13 +15,13 @@ import daomephsta.unpick.api.constantresolvers.IConstantResolver;
 public interface ReplacementInstructionGenerator
 {
 	public abstract boolean canReplace(Context context);
-	
+
 	/**
 	 * Generates replacement instructions for the provided value
 	 * @param context TODO
 	 */
 	public abstract void generateReplacements(Context context);
-	
+
 	public class Context
 	{
 		private final IConstantResolver constantResolver;
@@ -56,12 +56,12 @@ public interface ReplacementInstructionGenerator
 		{
 			return argSeed;
 		}
-		
+
 		public Frame<UnpickValue> getFrameForInstruction(AbstractInsnNode insn)
 		{
 			return frames[instructions.indexOf(insn)];
 		}
-		
+
 		public Logger getLogger()
 		{
 			return logger;

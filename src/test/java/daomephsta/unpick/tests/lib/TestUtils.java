@@ -13,7 +13,7 @@ import daomephsta.unpick.impl.*;
 import daomephsta.unpick.tests.lib.MethodMocker.MockMethod;
 
 public class TestUtils
-{	
+{
 	public static void printVisitable(Consumer<MethodVisitor> visitable)
 	{
 		System.out.println(Utils.visitableToString(visitable));
@@ -25,18 +25,18 @@ public class TestUtils
 		Type actualType = LiteralType.from(constant.getClass()).getType();
 		if (!expectedType.equals(actualType))
 		{
-			throw new IllegalArgumentException(String.format("Expected constant of type %s, actual type %s", 
+			throw new IllegalArgumentException(String.format("Expected constant of type %s, actual type %s",
 					expectedType.getClassName(), actualType.getClassName()));
 		}
-		
-		return MethodMocker.mock(void.class, mv -> 
+
+		return MethodMocker.mock(void.class, mv ->
 		{
 			InstructionFactory.pushesValue(mv, constant);
 			mv.visitMethodInsn(INVOKESTATIC, methodOwner.getName().replace('.', '/'), methodName, methodDescriptor, false);
 			mv.visitInsn(RETURN);
 		});
 	}
-	
+
 	public static void dumpClassNode(ClassNode clazz, File dumpPath, String dumpName)
 	{
 		ClassWriter cw = new ClassWriter(0);
