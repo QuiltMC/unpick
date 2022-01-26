@@ -54,7 +54,7 @@ allprojects {
         repositories {
             if (ENV.MAVEN_URL) {
                 repositories.maven {
-                    name "quilt"
+                    name "Quilt"
                     url ENV.MAVEN_URL
                     credentials {
                         username ENV.MAVEN_USERNAME
@@ -64,7 +64,7 @@ allprojects {
             }
             if (ENV.SNAPSHOTS_URL) {
                 repositories.maven {
-                    name "quiltsnapshot"
+                    name "QuiltSnapshot"
                     url ENV.SNAPSHOTS_URL
                     credentials {
                         username ENV.SNAPSHOTS_USERNAME
