@@ -2,6 +2,7 @@ package daomephsta.unpick.impl.representations;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.objectweb.asm.*;
 
@@ -11,10 +12,10 @@ import daomephsta.unpick.impl.representations.TargetMethods.TargetMethod;
 
 public class TargetMethods implements Iterable<TargetMethod>
 {
-	private final Map<String, TargetMethod> methods;
+	private final Map<String, List<TargetMethod>> methods;
 	private final IClassResolver classResolver;
 
-	private TargetMethods(IClassResolver classResolver, Map<String, TargetMethod> methods)
+	private TargetMethods(IClassResolver classResolver, Map<String, List<TargetMethod>> methods)
 	{
 		this.classResolver = classResolver;
 		this.methods = methods;
@@ -27,40 +28,46 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 	public boolean targets(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
-		if (targetMethod == null)
+		List<TargetMethod> possibleMethods = methods.getOrDefault(methodName + methodDescriptor, Collections.emptyList());
+		if (possibleMethods.isEmpty()) {
 			return false;
-		return targetMethod.implementedBy(classResolver, methodOwner);
+		}
+
+		return possibleMethods.stream().anyMatch(method -> method.implementedBy(classResolver, methodOwner));
 	}
 
 	public boolean targetsParameter(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
-		return targetMethod.hasParameterConstantGroup(parameterIndex);
+		return methods.get(methodName + methodDescriptor).stream().anyMatch(method -> method.hasParameterConstantGroup(parameterIndex));
 	}
 
 	public boolean targetsReturn(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
-		return targetMethod.hasReturnConstantGroup();
+		return methods.get(methodName + methodDescriptor).stream().anyMatch(TargetMethod::hasReturnConstantGroup);
 	}
 
 	public String getParameterConstantGroup(String methodOwner, String methodName, String methodDescriptor, int parameterIndex)
 	{
-		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
-		return targetMethod.getParameterConstantGroup(parameterIndex);
+		List<TargetMethod> targetMethods = methods.get(methodName + methodDescriptor).stream().filter(method -> method.implementedBy(classResolver, methodOwner)).collect(Collectors.toList());
+		if (targetMethods.size() != 1) {
+			throw new RuntimeException("Other than one possible method for " + methodName + methodDescriptor + " for class " + methodOwner + "was found: " + targetMethods);
+		}
+		return targetMethods.get(0).getParameterConstantGroup(parameterIndex);
 	}
 
 	public String getReturnConstantGroup(String methodOwner, String methodName, String methodDescriptor)
 	{
-		TargetMethod targetMethod = methods.get(methodOwner + ";" + methodName + methodDescriptor);
-		return targetMethod.getReturnConstantGroup();
+		List<TargetMethod> targetMethods = methods.get(methodName + methodDescriptor).stream().filter(method -> method.implementedBy(classResolver, methodOwner)).collect(Collectors.toList());
+		if (targetMethods.size() != 1) {
+			throw new RuntimeException("Other than one possible method for " + methodName + methodDescriptor + " for class " + methodOwner + "was found: " + targetMethods);
+		}
+		return targetMethods.get(0).getReturnConstantGroup();
 	}
 
 	@Override
 	public Iterator<TargetMethod> iterator()
 	{
-		return methods.values().iterator();
+		return methods.values().stream().flatMap(Collection::stream).iterator();
 	}
 
 	@Override
@@ -72,7 +79,7 @@ public class TargetMethods implements Iterable<TargetMethod>
 	public static class Builder
 	{
 		private final IClassResolver classResolver;
-		private final Map<String, TargetMethod> targetMethods = new HashMap<>();
+		private final Map<String, List<TargetMethod>> targetMethods = new HashMap<>();
 
 		private Builder(IClassResolver classResolver)
 		{
@@ -125,34 +132,44 @@ public class TargetMethods implements Iterable<TargetMethod>
 
 		public Builder add()
 		{
-			parent.targetMethods.compute(owner + ";" + name + descriptor, (key, existing) ->
+			parent.targetMethods.compute(name + descriptor, (key, existingMethods) ->
 			{
-				if (existing != null)
-				{
-					// Find non-null returnConstantGroup, throw if both are non-null
-					// Note that exceptions always use values from the existing TargetMethod
-					if (returnConstantGroup == null && existing.returnConstantGroup != null)
-						returnConstantGroup = existing.returnConstantGroup;
-					else if (returnConstantGroup != null && existing.returnConstantGroup == null)
-						/*NO OP*/;
-					else if (!Objects.equals(existing.returnConstantGroup, returnConstantGroup))
-						throw duplicateReturnGroup(existing.returnConstantGroup, returnConstantGroup);
-
-					// Merge parameterConstantGroups, throwing on duplicate keys
-					// Note that exceptions always use keys & values from the existing TargetMethod
-					for (Entry<Integer, String> entry : existing.parameterConstantGroups.entrySet()) 
-					{
-						String oldGroup = parameterConstantGroups.putIfAbsent(entry.getKey(), entry.getValue());
-						if (oldGroup != null) {
-							if (oldGroup.equals(entry.getValue())) {
-								return existing;
-							}
-							throw duplicateParameterGroup(entry.getKey(), oldGroup, entry.getValue());
+				if (existingMethods != null) {
+					for (TargetMethod existing : existingMethods) {
+						if (existing.implementedBy(parent.classResolver, owner) && !existing.declarator.equals(owner)) {
+								throw new IllegalArgumentException("Cannot define unpicks for extension of method " + name + " from class " + owner);
 						}
 
+						if (existing.declarator.equals(owner)) {
+							// Find non-null returnConstantGroup, throw if both are non-null
+							// Note that exceptions always use values from the existing TargetMethod
+							if (returnConstantGroup == null && existing.returnConstantGroup != null)
+								returnConstantGroup = existing.returnConstantGroup;
+							else if (returnConstantGroup != null && existing.returnConstantGroup == null)
+								/*NO OP*/ ;
+							else if (!Objects.equals(existing.returnConstantGroup, returnConstantGroup))
+								throw duplicateReturnGroup(existing.returnConstantGroup, returnConstantGroup);
+
+							// Merge parameterConstantGroups, throwing on duplicate keys
+							// Note that exceptions always use keys & values from the existing TargetMethod
+							for (Entry<Integer, String> entry : existing.parameterConstantGroups.entrySet()) {
+								String oldGroup = parameterConstantGroups.putIfAbsent(entry.getKey(), entry.getValue());
+								if (oldGroup != null) {
+									if (oldGroup.equals(entry.getValue())) {
+										continue;
+									}
+									throw duplicateParameterGroup(entry.getKey(), oldGroup, entry.getValue());
+								}
+
+							}
+							existingMethods.remove(existing);
+							existingMethods.add(new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup));
+						}
 					}
 				}
-				return new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup);
+				ArrayList<TargetMethod> targetMethods = new ArrayList<>();
+				targetMethods.add(new TargetMethod(owner, name, descriptor, parameterConstantGroups, returnConstantGroup));
+				return targetMethods;
 			});
 			return parent;
 		}
