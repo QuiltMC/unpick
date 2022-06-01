@@ -78,6 +78,13 @@ allprojects {
                 from components.java
                 artifact(javadocJar)
             }
+
+            // Also publish under org.quiltmc group to fix unpick in QM
+            mavenJavaQuiltGroup(MavenPublication) {
+                from components.java
+                artifact(javadocJar)
+                groupId("org.quiltmc.unpick")
+            }
         }
     }
 }
