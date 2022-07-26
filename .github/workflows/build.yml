@@ -4,13 +4,13 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [8-jdk, 11-jdk, 15-jdk]
-    runs-on: ubuntu-20.04
-    container:
-      image: openjdk:${{ matrix.java }}
-      options: --user root
+        java: [8, 11, 17, 18]
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: gradle/wrapper-validation-action@v1
-      - run: apt-get install findutils
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: adopt
       - run: ./gradlew build --stacktrace
