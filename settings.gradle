@@ -1,3 +1,17 @@
+dependencyResolutionManagement {
+	versionCatalogs {
+		libs {
+			version('asm', '9.2')
+
+			def asmGroup = 'org.ow2.asm'
+			library('asm', asmGroup, 'asm').versionRef('asm')
+			library('asm.tree', asmGroup, 'asm-tree').versionRef('asm')
+			library('asm.commons', asmGroup, 'asm-commons').versionRef('asm')
+			library('asm.util', asmGroup, 'asm-util').versionRef('asm')
+		}
+	}
+}
+
 include 'unpick-format-utils'
 include 'unpick-cli'
 

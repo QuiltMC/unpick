@@ -11,7 +11,7 @@ allprojects {
     group = 'org.quiltmc.unpick'
 
     def ENV = System.getenv()
-    version = "3.0.0" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
+    version = "3.0.1" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
     version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
     sourceCompatibility = 1.8
@@ -22,10 +22,10 @@ allprojects {
     }
 
     dependencies {
-        api 'org.ow2.asm:asm:9.1'
-        api 'org.ow2.asm:asm-tree:9.1'
-        implementation 'org.ow2.asm:asm-commons:9.1'
-        implementation 'org.ow2.asm:asm-util:9.1'
+        api libs.asm
+        api libs.asm.tree
+        implementation libs.asm.commons
+        implementation libs.asm.util
 
         // Use JUnit test framework
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
