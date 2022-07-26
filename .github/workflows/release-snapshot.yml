@@ -9,7 +9,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17
-          distribution: adopt
+          distribution: temurin
       - run: ./gradlew build publish --stacktrace
         env:
           SNAPSHOTS_URL: ${{ secrets.SNAPSHOTS_URL }}
