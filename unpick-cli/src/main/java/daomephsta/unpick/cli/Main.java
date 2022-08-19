@@ -149,7 +149,7 @@ public class Main {
 		{
 			return cache.computeIfAbsent(internalName, name -> {
 				ClassNode node = new ClassNode();
-				resolveClassReader(name).accept(node, ClassReader.SKIP_DEBUG);
+				resolveClassReader(name).accept(node, 0);
 				return node;
 			});
 		}
