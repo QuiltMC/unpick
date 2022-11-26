@@ -43,14 +43,20 @@ allprojects {
 
     java {
         withSourcesJar()
+        withJavadocJar()
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        archiveClassifier = 'javadoc'
-        from javadoc.destinationDir
+    test {
+        useJUnitPlatform()
     }
 
     publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
         repositories {
             if (ENV.MAVEN_URL) {
                 repositories.maven {
@@ -62,21 +68,16 @@ allprojects {
                     }
                 }
             }
+
             if (ENV.SNAPSHOTS_URL) {
                 repositories.maven {
-                    name "QuiltSnapshot"
+                    name "Quilt Snapshot"
                     url ENV.SNAPSHOTS_URL
                     credentials {
                         username ENV.SNAPSHOTS_USERNAME
                         password ENV.SNAPSHOTS_PASSWORD
                     }
                 }
-            }
-        }
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-                artifact(javadocJar)
             }
         }
     }
