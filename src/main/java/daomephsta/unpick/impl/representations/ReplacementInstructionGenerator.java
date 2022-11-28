@@ -1,13 +1,13 @@
 package daomephsta.unpick.impl.representations;
 
-import java.util.logging.Logger;
-
 import daomephsta.unpick.impl.UnpickValue;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.analysis.Frame;
 
 import daomephsta.unpick.api.constantresolvers.IConstantResolver;
+
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Daomephsta

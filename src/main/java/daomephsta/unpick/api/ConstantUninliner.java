@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Opcodes;
@@ -28,6 +26,10 @@ import daomephsta.unpick.impl.UnpickInterpreter;
 import daomephsta.unpick.impl.UnpickValue;
 import daomephsta.unpick.impl.representations.ReplacementInstructionGenerator.Context;
 import daomephsta.unpick.impl.representations.ReplacementSet;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * Uninlines inlined values
  * @author Daomephsta
@@ -50,7 +52,7 @@ public class ConstantUninliner
 	 */
 	public ConstantUninliner(IClassResolver classResolver, IConstantMapper mapper, IConstantResolver constantResolver)
 	{
-		this(classResolver, mapper, constantResolver, Logger.getLogger("unpick"));
+		this(classResolver, mapper, constantResolver, LogManager.getLogger("unpick"));
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class ConstantUninliner
 
 	private ClassNode transformMethod(ClassNode methodOwner, MethodNode method)
 	{
-		logger.log(Level.INFO, String.format("Processing %s.%s%s", methodOwner, method.name, method.desc));
+		logger.info(String.format("Processing %s.%s%s", methodOwner, method.name, method.desc));
 		try
 		{
 			ReplacementSet replacementSet = new ReplacementSet(method.instructions);
@@ -149,7 +151,7 @@ public class ConstantUninliner
 		}
 		catch (AnalyzerException e)
 		{
-			logger.log(Level.WARNING, String.format("Processing %s.%s%s failed", methodOwner, method.name, method.desc), e);
+			logger.error(String.format("Processing %s.%s%s failed", methodOwner, method.name, method.desc), e);
 		}
 		return methodOwner;
 	}
@@ -184,7 +186,7 @@ public class ConstantUninliner
 			return null;
 		if (!mapper.targetsParameter(methodOwner, enclosingMethod.name, enclosingMethod.desc, parameterIndex))
 			return null;
-		logger.log(Level.INFO, String.format("Using enclosing method %s.%s%s parameter %d", methodOwner, enclosingMethod.name, enclosingMethod.desc, parameterIndex));
+		logger.info(String.format("Using enclosing method %s.%s%s parameter %d", methodOwner, enclosingMethod.name, enclosingMethod.desc, parameterIndex));
 		return context -> mapper.mapParameter(methodOwner, enclosingMethod.name, enclosingMethod.desc, parameterIndex, context);
 	}
 
@@ -204,7 +206,7 @@ public class ConstantUninliner
 				int paramIndex = hasThis ? methodUsage.getParamIndex() - 1 : methodUsage.getParamIndex();
 				if (!mapper.targetsParameter(lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex))
 					return null;
-				logger.log(Level.INFO, String.format("Using lambda %s.%s%s captured parameter %d",
+				logger.info(String.format("Using lambda %s.%s%s captured parameter %d",
 					lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex));
 				return context -> mapper.mapParameter(lambdaMethod.getOwner(), lambdaMethod.getName(), lambdaMethod.getDesc(), paramIndex, context);
 			}
@@ -218,7 +220,7 @@ public class ConstantUninliner
 				return null;
 			if (!mapper.targetsParameter(methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex()))
 				return null;
-			logger.log(Level.INFO, String.format("Using method invocation %s.%s%s parameter %d",
+			logger.info(String.format("Using method invocation %s.%s%s parameter %d",
 				methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex()));
 			return context -> mapper.mapParameter(methodInsn.owner, methodInsn.name, methodInsn.desc, methodUsage.getParamIndex(), context);
 		}
@@ -234,7 +236,7 @@ public class ConstantUninliner
 				return null;
 			if (!mapper.targetsReturn(method.owner, method.name, method.desc))
 				return null;
-			logger.log(Level.INFO, String.format("Using method invocation %s.%s%s return type", method.owner, method.name, method.desc));
+			logger.info(String.format("Using method invocation %s.%s%s return type", method.owner, method.name, method.desc));
 			return context -> mapper.mapReturn(method.owner, method.name, method.desc, context);
 		}
 
@@ -247,7 +249,7 @@ public class ConstantUninliner
 					return null;
 				if (!mapper.targetsReturn(sam.owner, sam.name, sam.descriptor))
 					return null;
-				logger.log(Level.INFO, String.format("Using lambda SAM %s.%s%s return type",
+				logger.info(String.format("Using lambda SAM %s.%s%s return type",
 					sam.owner, sam.name, sam.descriptor));
 				return context -> mapper.mapReturn(sam.owner, sam.name, sam.descriptor, context);
 			}
@@ -255,7 +257,7 @@ public class ConstantUninliner
 				return null;
 			if (!mapper.targetsReturn(methodOwner, enclosingMethod.name, enclosingMethod.desc))
 				return null;
-			logger.log(Level.INFO, String.format("Using enclosing method %s.%s%s return type",
+			logger.info(String.format("Using enclosing method %s.%s%s return type",
 				methodOwner, enclosingMethod.name, enclosingMethod.desc));
 			return context -> mapper.mapReturn(methodOwner, enclosingMethod.name, enclosingMethod.desc, context);
 		}

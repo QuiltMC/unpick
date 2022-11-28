@@ -1,7 +1,6 @@
 package daomephsta.unpick.impl.representations;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -9,13 +8,16 @@ import org.objectweb.asm.tree.InsnList;
 
 import daomephsta.unpick.impl.*;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * A group of flags represented by {@link FlagDefinition}s.
  * @author Daomephsta
  */
 public class FlagConstantGroup extends AbstractConstantGroup<FlagDefinition>
 {
-	private static final Logger LOGGER = Logger.getLogger("unpick");
+	private static final Logger LOGGER = LogManager.getLogger("unpick");
 	private final Collection<FlagDefinition> resolvedConstantDefinitions = new ArrayList<>();
 
 	public FlagConstantGroup(String id)

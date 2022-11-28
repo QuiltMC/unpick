@@ -1,8 +1,12 @@
 [versions]
 asm = "9.4"
+log4j = "2.19.0"
 
 [libraries]
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm_tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 asm_commons = { module = "org.ow2.asm:asm-commons", version.ref = "asm" }
 asm_util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
+
+log4j_api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j_core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }

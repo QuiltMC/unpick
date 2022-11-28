@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import daomephsta.unpick.api.constantresolvers.IConstantResolver;
 import daomephsta.unpick.impl.representations.AbstractConstantDefinition.ResolutionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public abstract class AbstractConstantGroup<T extends AbstractConstantDefinition<T>> implements ReplacementInstructionGenerator
 {
-	private static final Logger LOGGER = Logger.getLogger("unpick");
+	private static final Logger LOGGER = LogManager.getLogger("unpick");
 	protected final Collection<T> unresolvedConstantDefinitions = new ArrayList<>();
 	private final String id;
 
@@ -43,7 +45,7 @@ public abstract class AbstractConstantGroup<T extends AbstractConstantDefinition
 			}
 		}
 		if (!isResolved())
-			LOGGER.severe("Resolution failed for the following constants of group " + id + '\n' + String.join("\n", errors));
+			LOGGER.error("Resolution failed for the following constants of group " + id + '\n' + String.join("\n", errors));
 	}
 
 	public boolean isResolved()

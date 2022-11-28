@@ -1,7 +1,6 @@
 package daomephsta.unpick.impl.constantmappers;
 
 import java.util.Map;
-import java.util.logging.Level;
 
 import daomephsta.unpick.api.constantmappers.IConstantMapper;
 import daomephsta.unpick.constantmappers.datadriven.parser.UnpickSyntaxException;
@@ -43,12 +42,12 @@ public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 		}
 		if (!constantGroup.canReplace(context))
 		{
-			context.getLogger().log(Level.INFO, "Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
+			context.getLogger().info("Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
 			return;
 		}
 
 		constantGroup.generateReplacements(context);
-		context.getLogger().log(Level.INFO, "Transformation complete");
+		context.getLogger().info("Transformation complete");
 	}
 
 	@Override
@@ -69,11 +68,11 @@ public abstract class SimpleAbstractConstantMapper implements IConstantMapper
 		}
 		if (!constantGroup.canReplace(context))
 		{
-			context.getLogger().log(Level.INFO, "Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
+			context.getLogger().info("Transformation skipped. Constant group " + constantGroupID + " cannot transform this invocation.");
 			return;
 		}
 
 		constantGroup.generateReplacements(context);
-		context.getLogger().log(Level.INFO, "Transformation complete");
+		context.getLogger().info("Transformation complete");
 	}
 }

@@ -27,6 +27,9 @@ allprojects {
         implementation libs.asm.commons
         implementation libs.asm.util
 
+        api libs.log4j.api
+        implementation libs.log4j.core
+
         // Use JUnit test framework
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
         testImplementation 'org.junit.jupiter:junit-jupiter-params:5.+'

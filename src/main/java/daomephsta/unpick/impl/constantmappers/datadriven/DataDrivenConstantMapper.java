@@ -3,7 +3,6 @@ package daomephsta.unpick.impl.constantmappers.datadriven;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 import daomephsta.unpick.api.IClassResolver;
 import daomephsta.unpick.api.constantresolvers.IConstantResolver;
@@ -14,13 +13,16 @@ import daomephsta.unpick.impl.constantmappers.datadriven.parser.v2.V2Parser;
 import daomephsta.unpick.impl.representations.AbstractConstantGroup;
 import daomephsta.unpick.impl.representations.TargetMethods;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Maps inlined values to constants using mappings defined in a file
  * @author Daomephsta
  */
 public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 {
-	private static final Logger LOGGER = Logger.getLogger("unpick");
+	private static final Logger LOGGER = LogManager.getLogger("unpick");
 	private final TargetMethods targetMethods;
 
 	public DataDrivenConstantMapper(IClassResolver classResolver, IConstantResolver constantResolver, InputStream... mappingSources)
