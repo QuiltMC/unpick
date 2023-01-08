@@ -77,7 +77,7 @@ public class UnpickV2Remapper implements Visitor
 			{
 				String objectSignature = objectSignatureMatcher.group(1);
 				if (classMappings.containsKey(objectSignature))
-					remappedDescriptor = remappedDescriptor.replace(objectSignature, classMappings.get(objectSignature));
+					remappedDescriptor = remappedDescriptor.replaceFirst(objectSignature, classMappings.get(objectSignature));
 			}
 		}
 
