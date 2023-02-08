@@ -274,7 +274,12 @@ public class ConstantUninliner
 				String samOwner = Type.getMethodType(invokeDynamic.desc).getReturnType().getInternalName();
 				String samName = invokeDynamic.name;
 				String samDesc = ((Type) invokeDynamic.bsmArgs[0]).getDescriptor();
-				lambdaSAMs.put(MethodTriple.fromHandle(implementation), new MethodTriple(samOwner, samName, samDesc));
+				MethodTriple old = lambdaSAMs.put(MethodTriple.fromHandle(implementation), new MethodTriple(samOwner, samName, samDesc));
+
+				if (old != null) {
+					return null;
+				}
+
 				if (lambdaOwner.name.equals(methodOwner) && lambda.name.equals(enclosingMethod.name)) {
 					return null;
 				}
