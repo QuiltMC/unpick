@@ -4,13 +4,12 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [8, 11, 17, 18]
-    runs-on: ubuntu-latest
+        java: [8-jdk, 11-jdk, 17-jdk, 21-jdk]
+    runs-on: ubuntu-22.04
+    container:
+      image: eclipse-temurin:${{ matrix.java }}
+      options: --user root
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: temurin
-      - run: ./gradlew build --stacktrace
+      - uses: gradle/wrapper-validation-action@v1
+      - run: ./gradlew build --stacktrace --warning-mode fail

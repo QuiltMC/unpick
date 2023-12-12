@@ -14,9 +14,6 @@ allprojects {
     version = "3.0.7" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
     version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-
     repositories {
         mavenCentral()
     }
@@ -34,6 +31,11 @@ allprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
         testImplementation 'org.junit.jupiter:junit-jupiter-params:5.+'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.+'
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -47,6 +49,9 @@ allprojects {
     java {
         withSourcesJar()
         withJavadocJar()
+
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
 
     test {
