@@ -1,5 +1,5 @@
 [versions]
-asm = "9.4"
+asm = "9.7"
 log4j = "2.19.0"
 
 [libraries]
