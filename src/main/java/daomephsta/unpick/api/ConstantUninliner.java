@@ -268,6 +268,11 @@ public class ConstantUninliner
 			if (createsLambda(invokeDynamic))
 			{
 				Handle implementation = (Handle) invokeDynamic.bsmArgs[1];
+
+				if (implementation.isInterface()) {
+					return null;
+				}
+
 				ClassNode lambdaOwner = classResolver.resolveClassNode(implementation.getOwner());
 				MethodNode lambda = findMethod(lambdaOwner,
 					implementation.getName(), implementation.getDesc());
