@@ -104,8 +104,7 @@ public class UnpickV2Reader implements Closeable
 	private void validateVersion(InputStreamReader definitionStream) throws IOException {
 		// only consume chars for the version
 		char[] versionChars = new char [2];
-		definitionStream.read(versionChars);
-		if (versionChars[0] == 'v')
+		if (definitionStream.read(versionChars) == 2 && versionChars[0] == 'v')
 		{
 			switch (versionChars[1])
 			{
@@ -120,7 +119,7 @@ public class UnpickV2Reader implements Closeable
 			}
 		}
 		else
-			throw new UnpickSyntaxException(1, "Missing version");
+			throw new UnpickSyntaxException(1, "Missing or invalid version");
 	}
 
 	private void visitParameterConstantGroupDefinition(Visitor visitor, String[] tokens, int lineNumber)
