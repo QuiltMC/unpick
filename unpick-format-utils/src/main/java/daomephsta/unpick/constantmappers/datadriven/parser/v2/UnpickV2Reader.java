@@ -38,10 +38,13 @@ public class UnpickV2Reader implements Closeable
 	 */
 	public void accept(Visitor visitor)
 	{
-		try(LineNumberReader reader = new LineNumberReader(new InputStreamReader(definitionsStream)))
+		try(InputStreamReader streamReader = new InputStreamReader(definitionsStream))
 		{
+			validateVersion(streamReader);
+			LineNumberReader reader = new LineNumberReader(streamReader);
+
 			Iterator<String[]> lineTokensIter = reader.lines()
-				.skip(1) //Skip version
+				.skip(1) // we already checked the version
 				.map(s -> stripComment(s.trim()))
 				.filter(s -> !s.isEmpty()) //Discard empty lines & lines that are empty once comments are stripped
 				.map(l -> Arrays.stream(WHITESPACE_SPLITTER.split(l)).filter(s -> !s.isEmpty()).toArray(String[]::new)) //Tokenise lines
@@ -96,6 +99,28 @@ public class UnpickV2Reader implements Closeable
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private void validateVersion(InputStreamReader definitionStream) throws IOException {
+		// only consume chars for the version
+		char[] versionChars = new char [2];
+		definitionStream.read(versionChars);
+		if (versionChars[0] == 'v')
+		{
+			switch (versionChars[1])
+			{
+				case '1':
+					throw new UnpickSyntaxException(1, "Incompatible version! (v1 data passed to v2 reader)");
+
+				case '2':
+					return;
+
+				default :
+					throw new UnpickSyntaxException(1, "Unknown version " + versionChars[1]);
+			}
+		}
+		else
+			throw new UnpickSyntaxException(1, "Missing version");
 	}
 
 	private void visitParameterConstantGroupDefinition(Visitor visitor, String[] tokens, int lineNumber)
