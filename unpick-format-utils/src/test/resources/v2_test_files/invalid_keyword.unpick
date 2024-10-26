@@ -1,0 +1,7 @@
+v2
+
+gaming flag org/quiltmc/Gaming GAMING
+gaming flag org/quiltmc/Gaming NOT_GAMING
+
+target_method org/quiltmc/Gaming getFlag (I)Z
+	param 0 flag

@@ -1,0 +1,5 @@
+constant flag org/quiltmc/Gaming GAMING
+constant flag org/quiltmc/Gaming NOT_GAMING
+
+target_method org/quiltmc/Gaming getFlag (I)Z
+	param 0 flag

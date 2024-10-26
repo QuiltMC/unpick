@@ -1,6 +1,7 @@
 [versions]
 asm = "9.7"
 log4j = "2.19.0"
+junit = "5.9.3"
 
 [libraries]
 asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
@@ -10,3 +11,5 @@ asm_util = { module = "org.ow2.asm:asm-util", version.ref = "asm" }
 
 log4j_api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j_core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+
+junit = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
