@@ -28,15 +28,9 @@ allprojects {
         implementation libs.log4j.core
 
         // Use JUnit test framework
-        testImplementation platform('org.junit:junit-bom:5.10.1')
-        testImplementation 'org.junit.jupiter:junit-jupiter-api'
-        testImplementation 'org.junit.jupiter:junit-jupiter-params'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    }
-
-    test {
-        useJUnitPlatform()
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.+'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.+'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.+'
     }
 
     tasks.withType(JavaCompile).configureEach {
