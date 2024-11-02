@@ -11,7 +11,7 @@ allprojects {
     group = 'org.quiltmc.unpick'
 
     def ENV = System.getenv()
-    version = "3.0.8" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
+    version = "3.0.9" + (ENV.SNAPSHOTS_URL ? "-SNAPSHOT" : "")
     version = version + (ENV.GITHUB_ACTIONS ? "" : "+local")
 
     repositories {
