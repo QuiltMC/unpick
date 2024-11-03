@@ -120,7 +120,7 @@ public class UnpickV2Reader implements Closeable
 			}
 		}
 		else
-			throw new UnpickSyntaxException(1, "Missing or invalid version (version chars: '" + Arrays.toString(versionChars) + "')");
+			throw new UnpickSyntaxException(1, "Missing or invalid version (version chars: " + Arrays.toString(versionChars) + ")");
 	}
 
 	private void visitParameterConstantGroupDefinition(Visitor visitor, String[] tokens, int lineNumber)
