@@ -40,6 +40,7 @@ public class UnpickV2Reader implements Closeable
 	{
 		try(InputStreamReader streamReader = new InputStreamReader(definitionsStream))
 		{
+			visitor.startVisit();
 			validateVersion(streamReader);
 			LineNumberReader reader = new LineNumberReader(streamReader);
 
@@ -49,7 +50,7 @@ public class UnpickV2Reader implements Closeable
 				.filter(s -> !s.isEmpty()) //Discard empty lines & lines that are empty once comments are stripped
 				.map(l -> Arrays.stream(WHITESPACE_SPLITTER.split(l)).filter(s -> !s.isEmpty()).toArray(String[]::new)) //Tokenise lines
 				.iterator();
-			visitor.startVisit();
+
 			while(lineTokensIter.hasNext())
 			{
 				String[] tokens = lineTokensIter.next();
@@ -119,7 +120,7 @@ public class UnpickV2Reader implements Closeable
 			}
 		}
 		else
-			throw new UnpickSyntaxException(1, "Missing or invalid version");
+			throw new UnpickSyntaxException(1, "Missing or invalid version (version chars: " + Arrays.toString(versionChars) + ")");
 	}
 
 	private void visitParameterConstantGroupDefinition(Visitor visitor, String[] tokens, int lineNumber)

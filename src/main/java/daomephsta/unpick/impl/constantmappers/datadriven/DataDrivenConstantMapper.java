@@ -1,8 +1,13 @@
 package daomephsta.unpick.impl.constantmappers.datadriven;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import daomephsta.unpick.api.IClassResolver;
 import daomephsta.unpick.api.constantresolvers.IConstantResolver;
@@ -36,16 +41,21 @@ public class DataDrivenConstantMapper extends SimpleAbstractConstantMapper
 				//Avoid buffering, so that only the version specifier bytes are consumed
 				byte[] version = new byte [2];
 				mappingSource.read(version);
+
+				// prepend the version to the stream (parsers will expect it to be present)
+				List<InputStream> streams = Arrays.asList(new ByteArrayInputStream(version), mappingSource);
+				InputStream newMappingSource = new SequenceInputStream(Collections.enumeration(streams));
+
 				if (version[0] == 'v')
 				{
 					switch (version[1])
 					{
 					case '1':
-						V1Parser.INSTANCE.parse(mappingSource, constantGroups, targetMethodsBuilder);
+						V1Parser.INSTANCE.parse(newMappingSource, constantGroups, targetMethodsBuilder);
 						break;
 
 					case '2':
-						V2Parser.parse(mappingSource, constantGroups, targetMethodsBuilder);
+						V2Parser.parse(newMappingSource, constantGroups, targetMethodsBuilder);
 						break;
 
 					default :
